@@ -29,6 +29,7 @@ namespace ProjectX
             brett = new cbrett(Length);
             
             game_state = 0;
+            brett.generate_map();
             Main_Menu_Ticker.Start();
 
         }
@@ -79,7 +80,7 @@ namespace ProjectX
 
         private void pbSpielbrett_MouseMove(object sender, MouseEventArgs e)
         {
-            Main_Menu_Ticker.Stop();
+            //Main_Menu_Ticker.Stop();
         }
 
 
@@ -90,8 +91,19 @@ namespace ProjectX
             {
                 for (Int32 j = 0; j < brett.getRange(); j++)
                 {
-                    gFlaeche.FillRectangle(Brushes.Gray, i *brett.getflen(), j *brett.getflen(), brett.getflen()-5, brett.getflen()-5);
-                    
+                    switch(brett.getFeld(i,j))
+                    {   case 0:
+                            gFlaeche.FillRectangle(Brushes.Gray, i *brett.getflen(), j *brett.getflen(), brett.getflen()-3, brett.getflen()-3);
+                        break;
+
+                        case 1:
+                            gFlaeche.FillRectangle(Brushes.Brown, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 3, brett.getflen() - 3);
+                        break;
+
+                        case 2:
+                        gFlaeche.FillRectangle(Brushes.Black, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 3, brett.getflen() - 3);
+                        break;
+                    }
                 }
             }
         }
@@ -99,12 +111,18 @@ namespace ProjectX
     }
     public class cbrett
     {
-        public Int32[,] Feld;
+        private Int32[,] Feld;
+        private Int32[,] Map;
 
+        private Int32 max_disabled;
+        private Int32 max_castle;
+        private Int32 count_disabled;
+        private Int32 count_castle;
+        
         private Int32 max_range;        // Status im Game                   
-
         private const Int32 default_range = 8;
 
+        public Int32 temp;
         private Int32 flen;
 
         public cbrett(Int32 size,Int32 r)
@@ -113,14 +131,60 @@ namespace ProjectX
 
             //Für quadratische Fläche mit Felder Anzahl
             Feld = new Int32[r, r];
+            Map = new Int32[r, r];
+
             flen = size / max_range;
+            
+            max_disabled = r;
+            max_castle = r*2;
+
+            count_disabled = 0;
+            count_castle = 0;
+
         }
 
         public cbrett(Int32 size)
         {
             this.max_range = default_range;
             Feld = new Int32[this.max_range, this.max_range];
+            Map = new Int32[this.max_range, this.max_range];
+
             flen = size / max_range;
+            max_disabled = default_range*2;
+            max_castle = default_range*2;
+            
+            count_disabled = 0;
+            count_castle = 0;
+        }
+
+        public void generate_map()
+        {
+            Random zufall = new Random();
+            for (Int32 i = 0; i < max_range; i++)
+            {
+                for (Int32 j = 0; j < max_range; j++)
+                {
+                    Map[i,j] = zufall.Next(3);
+
+                    switch (Map[i, j])
+                    {
+                        case 1:
+                            if ((count_castle) < max_castle)
+                                count_castle++;
+                            else
+                                Map[i, j] = 0;
+                        break;
+
+                        case 2:
+                            if ((count_disabled) < max_disabled)
+                                count_disabled++;
+                            else
+                                Map[i, j] = 0;
+                        break;
+                        
+                    }
+                }
+            }
         }
 
         public Int32 getRange()
@@ -128,6 +192,9 @@ namespace ProjectX
 
         public Int32 getflen()
         { return flen; }
+
+        public Int32 getFeld(Int32 a, Int32 b)
+        { return Map[a, b]; }
 
     }
     
