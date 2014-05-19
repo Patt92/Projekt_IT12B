@@ -14,23 +14,24 @@ namespace ProjectX
     public partial class Form1 : Form
     {
         public cbrett brett;
-        private Bitmap hFlaeche;
 
         private Graphics gFlaeche;
         private Int32 Length;
         private Int32 game_state;
-        private Point[] play;
+        private Int32 old_x, old_y;
+        private Bitmap terrain, rock, castle;
 
         public Form1()
         {
             InitializeComponent();
 
             Length = pbSpielbrett.Size.Width;
-            brett = new cbrett(Length);
-            
             game_state = 0;
-            brett.generate_map();
-            Main_Menu_Ticker.Start();
+            old_x = 0;
+            old_y = 0;
+            terrain = new Bitmap(Properties.Resources.stone);
+            rock = new Bitmap(Properties.Resources.rock);
+            castle = new Bitmap(Properties.Resources.house);
 
         }
 
@@ -42,23 +43,13 @@ namespace ProjectX
 
         private void pbSpielbrett_Paint(object sender, PaintEventArgs e)
         {
-            gFlaeche = this.CreateGraphics();
-            gFlaeche.FillRectangle(Brushes.Blue, 50, (Length / 2) - 75, Length - 100, 150);
+
         }
 
-        private void Main_Menu_Ticker_Tick(object sender, EventArgs e) //Das muss überarbeitet werden, hatte bei mir nur so funktioniert
+        private void Spielbrett_Tick(object sender, EventArgs e) //Das muss überarbeitet werden, hatte bei mir nur so funktioniert
         {
             try
-            {
-                /*if (game_state == 0)
-                {
-                    for(Int32 i=0;i<255;i++)
-                    {
-                        start_button(i);
-                    }
-                    Main_Menu_Ticker.Stop();
-                }*/
-                
+            {   
                 zeichnen();
             }
             catch (Exception ex)
@@ -66,21 +57,27 @@ namespace ProjectX
                 MessageBox.Show("Fehler: " + ex.Message);
             }
 
-            Main_Menu_Ticker.Stop();
         }
 
         public void start_button(Int32 alpha)
         {
-            /*SolidBrush button_color = new SolidBrush(Color.FromArgb(alpha,0, 0, 255));
-            gFlaeche = pbSpielbrett.CreateGraphics();
-            gFlaeche.FillRectangle(button_color, 50, (Length/2)-75, Length-100, 150);
-            button_color = new SolidBrush(Color.FromArgb(alpha, 0, 255, 0));
-            gFlaeche.FillPolygon(button_color, play);*/
         }
 
         private void pbSpielbrett_MouseMove(object sender, MouseEventArgs e)
         {
-            //Main_Menu_Ticker.Stop();
+
+            if (game_state > 0)
+            {
+                if (brett.getFeld(e.X / brett.getflen(),e.Y / brett.getflen())!=3)
+                {
+                    brett.setFeld(e.X / brett.getflen(), e.Y / brett.getflen(), 3);
+                    brett.resetFeld(old_x, old_y);
+
+                    old_x = e.X / brett.getflen();
+                    old_y = e.Y / brett.getflen();
+                }
+                //purge(e.X, e.Y); Alter Befehl
+            }
         }
 
 
@@ -91,18 +88,94 @@ namespace ProjectX
             {
                 for (Int32 j = 0; j < brett.getRange(); j++)
                 {
+                    
                     switch(brett.getFeld(i,j))
                     {   case 0:
-                            gFlaeche.FillRectangle(Brushes.Gray, i *brett.getflen(), j *brett.getflen(), brett.getflen()-3, brett.getflen()-3);
+                            gFlaeche.DrawImage(terrain, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
 
                         case 1:
-                            gFlaeche.FillRectangle(Brushes.Brown, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 3, brett.getflen() - 3);
+                            gFlaeche.DrawImage(castle, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
 
                         case 2:
-                        gFlaeche.FillRectangle(Brushes.Black, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 3, brett.getflen() - 3);
+                            gFlaeche.DrawImage(rock, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
+
+                        case 3:
+                            gFlaeche.FillRectangle(Brushes.Yellow, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+                        break;
+
+
+                    }
+                }
+            }
+            
+        }
+
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState != FormWindowState.Minimized)
+                spielbrett.Start();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            
+            if (gFlaeche != null)
+            {   //hier
+                gFlaeche.Clear(Color.Black);
+                gFlaeche.Dispose();
+            }
+            
+    
+
+            try
+            {
+                brett = new cbrett(Length, Convert.ToInt32(tbRange.Text));
+                try
+                {
+
+                    brett.generate_map();
+
+                    lblKondition.Visible = true;
+                    lblLevel.Visible = true;
+                    lblPunkte.Visible = true;
+                    lblRadius.Visible = true;
+                    lblSpieler.Visible = true;
+                    lblZug.Visible = true;
+
+                    spielbrett.Start();
+                    game_state = 1;
+                }
+                catch
+                {
+                    MessageBox.Show("Unerwarteter Fehler. Scheinbar gab es ein Fehler beim erstellen der Map. Bitte versuche es erneut.", "Fehler beim Erstellen der Karte");
+                }
+                    
+            }
+            catch
+            {
+                MessageBox.Show("Der Range ist ungültig. Er sollte zwischen 8 und 20 liegen", "Fehler mit dem Spielfeldradius");
+            }
+        }
+
+        private void Cleanup_Tick(object sender, EventArgs e)
+        {
+            
+        }
+
+        public void purge(Int32 x, Int32 y)
+        {
+            for (Int32 i = 0; i < brett.getRange(); i++)
+            {
+                for (Int32 j = 0; j < brett.getRange(); j++)
+                {
+                    if (brett.getFeld(i, j) == 3)
+                    {
+                        if (x / brett.getflen() != i || y / brett.getflen() != j)
+                            brett.resetFeld(i, j);
                     }
                 }
             }
@@ -135,12 +208,23 @@ namespace ProjectX
 
             flen = size / max_range;
             
-            max_disabled = r;
-            max_castle = r*2;
+            max_disabled = r*r/3;
+            max_castle = r*r/3;
 
             count_disabled = 0;
             count_castle = 0;
 
+        }
+
+        public void setFeld(Int32 i,Int32 j,Int32 val)
+        {   if(i<max_range&&j<max_range)
+                Map[i,j] = val;
+        } 
+
+        public void resetFeld(Int32 i, Int32 j)
+        {
+            if (i < max_range && j < max_range)
+                Map[i, j] = Feld[i, j]; 
         }
 
         public cbrett(Int32 size)
@@ -160,6 +244,8 @@ namespace ProjectX
         public void generate_map()
         {
             Random zufall = new Random();
+
+            //Zufällig Felder befüllen
             for (Int32 i = 0; i < max_range; i++)
             {
                 for (Int32 j = 0; j < max_range; j++)
@@ -183,6 +269,64 @@ namespace ProjectX
                         break;
                         
                     }
+                }
+            }
+            //<- Ende Felder befüllen
+
+
+            //Deaktivierte Felder am Spielrand entfernen
+            for (Int32 i = 0; i < max_range; i++)
+            {
+                for (Int32 j = 0; j < max_range; j++)
+                {
+                    if (i == 0 || j == 0 || i == max_range - 1 || j == max_range - 1)
+                        if (Map[i, j] == 2)
+                            Map[i, j] = 0;
+                }
+            }
+            //<- Ende Deaktivierte Felder
+
+
+            //Vertikale Doppelfelder minimieren
+            for (Int32 i = 0; i < max_range; i++)
+            {
+                for (Int32 j = 0; j < max_range; j++)
+                {
+                    /*if (i > 0 && i < max_range - 1)
+                        if (Map[i, j] == Map[i+1, j])
+                            Map[i, j] = 0;
+                    */
+                    if (j > 0 && j < max_range - 1)
+                        if (Map[i, j] == Map[i, j+1])
+                            Map[i, j] = 0;
+                }
+
+            }
+
+            //Eingesperrte Burgen freilegen
+            for (Int32 i = 0; i < max_range; i++)
+            {
+                for (Int32 j = 0; j < max_range; j++)
+                {
+                    if (Map[i, j] == 1)
+                    {
+                        if ((i > 0 && j > 0) && (i < max_range-1 && j < max_range-1))
+                        {
+                            if (Map[i + 1, j] == 2 && Map[i, j + 1] == 2 && Map[i - 1, j] == 2 && Map[i, j - 1] == 2)
+                                Map[i, j] = 0;
+                        }
+                    }
+                }
+            }
+            //<- Ende eingesperrte Burgen
+
+            //Feld = Map;
+            for (Int32 i = 0; i < max_range; i++)
+            {
+                for (Int32 j = 0; j < max_range; j++)
+                {
+
+                    Feld[i,j] = Map[i, j];
                 }
             }
         }
