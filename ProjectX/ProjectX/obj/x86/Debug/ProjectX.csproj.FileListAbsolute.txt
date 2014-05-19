@@ -1,0 +1,8 @@
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\bin\Debug\ProjectX.exe
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\bin\Debug\ProjectX.pdb
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.Form1.resources
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.Properties.Resources.resources
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.csproj.GenerateResource.Cache
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.exe
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.pdb
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Debug\ProjectX.csprojResolveAssemblyReference.cache
