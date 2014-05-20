@@ -41,21 +41,29 @@
             this.button1 = new System.Windows.Forms.Button();
             this.tbRange = new System.Windows.Forms.TextBox();
             this.lblRadius = new System.Windows.Forms.Label();
-            this.Cleanup = new System.Windows.Forms.Timer(this.components);
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblOptionen = new System.Windows.Forms.Label();
+            this.tbPlayers = new System.Windows.Forms.TextBox();
+            this.lblLevelInput = new System.Windows.Forms.Label();
+            this.btnreset = new System.Windows.Forms.Button();
+            this.gpLevelEditor = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbSettings)).BeginInit();
+            this.gpLevelEditor.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbSpielbrett
             // 
             this.pbSpielbrett.BackColor = System.Drawing.Color.Black;
+            this.pbSpielbrett.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pbSpielbrett.Location = new System.Drawing.Point(-2, -1);
             this.pbSpielbrett.Name = "pbSpielbrett";
             this.pbSpielbrett.Size = new System.Drawing.Size(720, 720);
             this.pbSpielbrett.TabIndex = 0;
             this.pbSpielbrett.TabStop = false;
             this.pbSpielbrett.Paint += new System.Windows.Forms.PaintEventHandler(this.pbSpielbrett_Paint);
+            this.pbSpielbrett.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pbSpielbrett_MouseClick);
             this.pbSpielbrett.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pbSpielbrett_MouseMove);
             // 
             // spielbrett
@@ -154,7 +162,7 @@
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(747, 242);
+            this.button1.Location = new System.Drawing.Point(747, 278);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(231, 60);
             this.button1.TabIndex = 8;
@@ -168,11 +176,11 @@
             this.tbRange.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tbRange.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbRange.ForeColor = System.Drawing.Color.White;
-            this.tbRange.Location = new System.Drawing.Point(935, 319);
+            this.tbRange.Location = new System.Drawing.Point(151, 31);
             this.tbRange.Name = "tbRange";
             this.tbRange.Size = new System.Drawing.Size(43, 30);
             this.tbRange.TabIndex = 9;
-            this.tbRange.Text = "16";
+            this.tbRange.Text = "8";
             // 
             // lblRadius
             // 
@@ -180,15 +188,94 @@
             this.lblRadius.BackColor = System.Drawing.Color.Black;
             this.lblRadius.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRadius.ForeColor = System.Drawing.Color.White;
-            this.lblRadius.Location = new System.Drawing.Point(743, 322);
+            this.lblRadius.Location = new System.Drawing.Point(6, 34);
             this.lblRadius.Name = "lblRadius";
             this.lblRadius.Size = new System.Drawing.Size(129, 24);
             this.lblRadius.TabIndex = 10;
             this.lblRadius.Text = "Spielfeldradius:";
             // 
-            // Cleanup
+            // label1
             // 
-            this.Cleanup.Tick += new System.EventHandler(this.Cleanup_Tick);
+            this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.Black;
+            this.label1.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(6, 73);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(69, 24);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Spieler:";
+            // 
+            // lblOptionen
+            // 
+            this.lblOptionen.AutoSize = true;
+            this.lblOptionen.BackColor = System.Drawing.Color.Black;
+            this.lblOptionen.Font = new System.Drawing.Font("Calibri Light", 20F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblOptionen.ForeColor = System.Drawing.Color.White;
+            this.lblOptionen.Location = new System.Drawing.Point(730, 235);
+            this.lblOptionen.Name = "lblOptionen";
+            this.lblOptionen.Size = new System.Drawing.Size(116, 33);
+            this.lblOptionen.TabIndex = 12;
+            this.lblOptionen.Text = "Optionen";
+            // 
+            // tbPlayers
+            // 
+            this.tbPlayers.BackColor = System.Drawing.Color.Black;
+            this.tbPlayers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbPlayers.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbPlayers.ForeColor = System.Drawing.Color.White;
+            this.tbPlayers.Location = new System.Drawing.Point(151, 70);
+            this.tbPlayers.Name = "tbPlayers";
+            this.tbPlayers.Size = new System.Drawing.Size(43, 30);
+            this.tbPlayers.TabIndex = 13;
+            this.tbPlayers.Text = "2";
+            // 
+            // lblLevelInput
+            // 
+            this.lblLevelInput.AutoSize = true;
+            this.lblLevelInput.BackColor = System.Drawing.Color.Black;
+            this.lblLevelInput.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLevelInput.ForeColor = System.Drawing.Color.White;
+            this.lblLevelInput.Location = new System.Drawing.Point(6, 112);
+            this.lblLevelInput.Name = "lblLevelInput";
+            this.lblLevelInput.Size = new System.Drawing.Size(129, 24);
+            this.lblLevelInput.TabIndex = 14;
+            this.lblLevelInput.Text = "Starte in Level:";
+            // 
+            // btnreset
+            // 
+            this.btnreset.BackColor = System.Drawing.Color.Black;
+            this.btnreset.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.btnreset.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.btnreset.FlatAppearance.MouseOverBackColor = System.Drawing.Color.DimGray;
+            this.btnreset.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnreset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnreset.ForeColor = System.Drawing.Color.White;
+            this.btnreset.Location = new System.Drawing.Point(6, 151);
+            this.btnreset.Name = "btnreset";
+            this.btnreset.Size = new System.Drawing.Size(136, 36);
+            this.btnreset.TabIndex = 15;
+            this.btnreset.Text = "Zurücksetzen";
+            this.btnreset.UseVisualStyleBackColor = false;
+            this.btnreset.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // gpLevelEditor
+            // 
+            this.gpLevelEditor.BackColor = System.Drawing.Color.Black;
+            this.gpLevelEditor.Controls.Add(this.tbRange);
+            this.gpLevelEditor.Controls.Add(this.btnreset);
+            this.gpLevelEditor.Controls.Add(this.tbPlayers);
+            this.gpLevelEditor.Controls.Add(this.lblLevelInput);
+            this.gpLevelEditor.Controls.Add(this.lblRadius);
+            this.gpLevelEditor.Controls.Add(this.label1);
+            this.gpLevelEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gpLevelEditor.ForeColor = System.Drawing.Color.White;
+            this.gpLevelEditor.Location = new System.Drawing.Point(747, 344);
+            this.gpLevelEditor.Name = "gpLevelEditor";
+            this.gpLevelEditor.Size = new System.Drawing.Size(231, 202);
+            this.gpLevelEditor.TabIndex = 16;
+            this.gpLevelEditor.TabStop = false;
+            this.gpLevelEditor.Text = "Leveleditor";
             // 
             // Form1
             // 
@@ -196,8 +283,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(1008, 721);
-            this.Controls.Add(this.lblRadius);
-            this.Controls.Add(this.tbRange);
+            this.Controls.Add(this.gpLevelEditor);
+            this.Controls.Add(this.lblOptionen);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.lblLevel);
             this.Controls.Add(this.pbSettings);
@@ -215,6 +302,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbSettings)).EndInit();
+            this.gpLevelEditor.ResumeLayout(false);
+            this.gpLevelEditor.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -232,9 +321,14 @@
         private System.Windows.Forms.PictureBox pbSettings;
         private System.Windows.Forms.Label lblLevel;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox tbRange;
+        public System.Windows.Forms.TextBox tbRange;
         private System.Windows.Forms.Label lblRadius;
-        private System.Windows.Forms.Timer Cleanup;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblOptionen;
+        public System.Windows.Forms.TextBox tbPlayers;
+        private System.Windows.Forms.Label lblLevelInput;
+        private System.Windows.Forms.Button btnreset;
+        private System.Windows.Forms.GroupBox gpLevelEditor;
     }
 }
 
