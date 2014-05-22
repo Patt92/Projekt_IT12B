@@ -28,7 +28,7 @@ namespace ProjectX
             //3,2
             //1,4
 
-            if (pnr % 2 == 1)
+            /*if (pnr % 2 == 1)
                 x = 1;
             else
                 x = b.getRange() - 2;
@@ -37,6 +37,21 @@ namespace ProjectX
                 y = 1;
             else
                 y = b.getRange() - 2;
+            */
+
+            Int32 Length = b.getflen()*b.getRange() + b.getRange();
+
+            if (pnr % 2 == 1)
+                x = b.getflen();
+            else
+                x = Length - (2*b.getflen())-b.getRange();
+
+            if (pnr == 2 || pnr == 3)
+                y = b.getflen();
+            else
+                y = Length - (2*b.getflen())-b.getRange();
+           
+
 
             position = new Int32[2];
             position[0] = x;
@@ -52,6 +67,16 @@ namespace ProjectX
         {
             return position[1];
         }
+
+        public void setpos(Int32 _x, Int32 _y)
+        {
+            position[0] = _x;
+            position[1] = _y;
+        }
+        public Int32 getmovement()
+        { return movement; }
+        public void setmovement(Int32 m)
+        { movement = m; }
 
     }
 }

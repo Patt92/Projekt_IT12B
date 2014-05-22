@@ -25,6 +25,7 @@ namespace ProjectX
         private Int32 level; 
 
         private Int32 hover_count;
+        private Int32 active_player;
 
         //Allgemeiner Konstruktor      
         public cbrett(Form1 f)
@@ -42,7 +43,7 @@ namespace ProjectX
 
             max_disabled = max_range * max_range / 3;
             max_castle = max_range * max_range / 3;
-
+            active_player = 0;
             hover_count = 0;
         }
 
@@ -175,6 +176,14 @@ namespace ProjectX
             if (a < 0) a = 0;
             if (b < 0) b = 0;
             return Feld[a, b];
+        }
+        public Int32 getactive()
+        { return active_player; }
+        public void nextplayer(Int32 max)
+        {
+            active_player++;
+            if (active_player == max)
+                active_player = 0;
         }
 
     }

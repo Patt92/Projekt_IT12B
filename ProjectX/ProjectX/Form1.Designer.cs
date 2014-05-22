@@ -47,6 +47,7 @@
             this.lblLevelInput = new System.Windows.Forms.Label();
             this.btnreset = new System.Windows.Forms.Button();
             this.gpLevelEditor = new System.Windows.Forms.GroupBox();
+            this.Mover = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbSettings)).BeginInit();
@@ -277,6 +278,11 @@
             this.gpLevelEditor.TabStop = false;
             this.gpLevelEditor.Text = "Leveleditor";
             // 
+            // Mover
+            // 
+            this.Mover.Interval = 15;
+            this.Mover.Tick += new System.EventHandler(this.Mover_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -295,9 +301,11 @@
             this.Controls.Add(this.pbInfo);
             this.Controls.Add(this.pbSpielbrett);
             this.DoubleBuffered = true;
+            this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Spiel";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).EndInit();
@@ -329,6 +337,7 @@
         private System.Windows.Forms.Label lblLevelInput;
         private System.Windows.Forms.Button btnreset;
         private System.Windows.Forms.GroupBox gpLevelEditor;
+        private System.Windows.Forms.Timer Mover;
     }
 }
 

@@ -25,6 +25,9 @@ namespace ProjectX
         private SolidBrush hovering;
         public BufferedGraphicsContext con;
         public BufferedGraphics buffer;
+        private KeyEventArgs key;
+        private Int32 Mover_count;
+       
 
         public Form1()
         {
@@ -41,6 +44,7 @@ namespace ProjectX
             terrain = new Bitmap(Properties.Resources.stone);
             rock = new Bitmap(Properties.Resources.rock);
             castle = new Bitmap(Properties.Resources.house);
+            
 
         }
 
@@ -60,6 +64,7 @@ namespace ProjectX
             try
             {   
                 zeichnen();
+                
             }
             catch (Exception ex)
             { spielbrett.Stop(); game_state = 0; MessageBox.Show("Fehler: " + ex.Message); }
@@ -68,16 +73,16 @@ namespace ProjectX
 
         public void spieler_zeichnen()
         {
-
+            //Spieler zeichnen
             for (Int32 i = 0; i < players; i++)
             {
-               buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x() * brett.getflen(), spieler[i].getpos_y() * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+               buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x(), spieler[i].getpos_y(), brett.getflen() - 1, brett.getflen() - 1);
             }
         }
 
         private void pbSpielbrett_MouseMove(object sender, MouseEventArgs e)
         {
-            //Hover Methode
+            //Auswahl im Feld Methode
             if (game_state > 0)
             {
                 if (brett.getFeld(e.X / brett.getflen(),e.Y / brett.getflen())!=3)
@@ -237,5 +242,69 @@ namespace ProjectX
             tbPlayers.Text = "2";
         }
 
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (!Mover.Enabled)
+            {
+                key = e;
+                Mover_count = 0;
+                Mover.Start();
+            }
+        }
+
+        private void Mover_Tick(object sender, EventArgs e)
+        {
+            switch (key.KeyCode)
+            {
+                case Keys.Up:
+                        hochlaufen();
+                    break;
+                case Keys.Down:
+                        runterfallen();
+                    break;
+                case Keys.Left:
+                        linkslaufen();
+                    break;
+                case Keys.Right:
+                        rechtslaufen();
+                    break;
+
+            }
+            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+            Mover_count++;
+            if (Mover_count == 10) Mover.Stop();
+            
+        }
+
+        public Int32 zuIndex(Int32 coords)
+        {
+            return coords / brett.getflen();
+        }
+        public void hochlaufen()
+        {
+
+            if (spieler[brett.getactive()].getpos_y() > 0 && brett.getRealFeld(zuIndex(spieler[0].getpos_x()),(spieler[0].getpos_y() - brett.getflen() / 10)/brett.getflen()) != 2)
+                spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() - brett.getflen() / 10);
+        }
+        public void linkslaufen()
+        {
+            if (spieler[brett.getactive()].getpos_x() > 0 && brett.getRealFeld((spieler[0].getpos_x()-(brett.getflen()/10))/brett.getflen(), zuIndex(spieler[0].getpos_y())) != 2)
+            spieler[brett.getactive()].setpos(spieler[0].getpos_x() - brett.getflen() / 10, spieler[0].getpos_y());
+        }
+        public void rechtslaufen()
+        {
+            if (spieler[brett.getactive()].getpos_x() < brett.getflen()*brett.getRange()-brett.getflen() && brett.getRealFeld(zuIndex((spieler[0].getpos_x() + (brett.getflen()))), zuIndex(spieler[0].getpos_y())) != 2)
+                spieler[brett.getactive()].setpos(spieler[0].getpos_x() + brett.getflen() / 10, spieler[0].getpos_y());
+        }
+        public void runterfallen()
+        {
+            //spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() + brett.getflen() / 10);
+
+                while (brett.getRealFeld(zuIndex(spieler[0].getpos_x()), (spieler[0].getpos_y() ) / brett.getflen()+1) != 2 && spieler[brett.getactive()].getpos_y() < brett.getflen() * brett.getRange() - brett.getflen())
+                {
+                    spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() + brett.getflen() / 10);
+                }
+
+        }
     }  
 }
