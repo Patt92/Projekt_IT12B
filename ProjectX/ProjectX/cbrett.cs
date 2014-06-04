@@ -7,11 +7,10 @@ namespace ProjectX
 {
     public class cbrett
     {
-        //Konstanten
-        private const Int32 default_range = 8;
 
         //Map dient zur Darstellung und Feld enthält die tatsächlichen Werte
         private Int32[,] Feld, Map;
+        private Int32[] selector_pos;
 
         //Begrenzer
         private Int32 max_disabled, max_castle, max_range;
@@ -21,30 +20,40 @@ namespace ProjectX
 
         //Breite, bzw. Höhe eines Feldes
         private Int32 flen;
+        private Int32 step;
 
         private Int32 level; 
 
-        private Int32 hover_count;
+        private Int32 selector_draw_count;
         private Int32 active_player;
 
+
+        private Int32 players;
+
         //Allgemeiner Konstruktor      
-        public cbrett(Form1 f)
+        public cbrett(Form1 f, Int32 pbLength)
         {
             count_disabled = 0;
             count_castle = 0;
-            level = 0;
+            level = 1;
 
             max_range = Convert.ToInt32(f.tbRange.Text); //tbRange wurde public gemacht, für Interaktion
             
             Feld = new Int32[max_range, max_range];
             Map = new Int32[max_range, max_range];
 
-            flen = f.Length / max_range;
+            flen = pbLength / max_range;
+            step = flen / 10;
 
             max_disabled = max_range * max_range / 3;
             max_castle = max_range * max_range / 3;
+
             active_player = 0;
-            hover_count = 0;
+            selector_draw_count = 0;
+
+            selector_pos = new Int32[2];
+            Array.Clear(selector_pos, 0, 2);
+
         }
 
         public void setFeld(Int32 i, Int32 j, Int32 val)
@@ -57,7 +66,7 @@ namespace ProjectX
         {
             if (i < max_range && j < max_range)
                 Map[i, j] = Feld[i, j];
-            hoverclean();
+            selectorclean();
         }
         public void generate_map()
         {
@@ -130,12 +139,22 @@ namespace ProjectX
                         if ((i > 0 && j > 0) && (i < max_range - 1 && j < max_range - 1))
                         {
                             if (Map[i + 1, j] == 2 && Map[i, j + 1] == 2 && Map[i - 1, j] == 2 && Map[i, j - 1] == 2)
+                            {
                                 Map[i, j] = 0;
+                                Feld[i, j] = 0;
+                            }
                         }
                     }
                 }
             }
             //<- Ende eingesperrte Burgen
+
+
+            //Steine auf Startfeldern entfernen
+            Map[1, max_range - 2] = 0;
+            Map[1, 1] = 0;
+            Map[max_range - 2, 1] = 0;
+            Map[max_range - 2, max_range - 2] = 0;
 
             //Feld = Map;
             for (Int32 i = 0; i < max_range; i++)
@@ -145,14 +164,15 @@ namespace ProjectX
                     Feld[i, j] = Map[i, j];
                 }
             }
+
         }
 
-        public void hoverup()
-        {hover_count++;}
-        public Int32 hoverstate()
-        { return hover_count; }
-        public void hoverclean()
-        { hover_count = 0; }
+        public void drawselector()
+        {selector_draw_count++;}
+        public Int32 selectstate()
+        { return selector_draw_count; }
+        public void selectorclean()
+        { selector_draw_count = 0; }
 
         public Int32 getRange()
         { return max_range; }
@@ -186,5 +206,26 @@ namespace ProjectX
                 active_player = 0;
         }
 
+        public void setmaxplayers(Int32 p)
+        { players = p; }
+
+        public Int32 getplayers()
+        { return players; }
+
+        public Int32 getStep()
+        { return step; }
+
+        //Selector
+        public void setSelectorx(Int32 x)
+        { selector_pos[0] = x; }
+        public void setSelectory(Int32 y)
+        { selector_pos[1] = y; }
+        public Int32 getSelectorx()
+        { return selector_pos[0]; }
+        public Int32 getSelectory()
+        { return selector_pos[1]; }
+
+        public Int32 getLevel()
+        { return level; }
     }
 }

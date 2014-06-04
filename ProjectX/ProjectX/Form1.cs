@@ -13,38 +13,39 @@ namespace ProjectX
 
     public partial class Form1 : Form
     {
-        public cbrett brett;
-        public cplayer[] spieler;
-        public Int32 Length,players;
+        //Selbstdefinierte Klassen siehe <Klassennamen>.cs
+        public cbrett brett; //Spielbrettobjekt für Zugriff auf Felder
+        public cplayer[] spieler; //Spielerobjekte unbegrenzte Anzahl
 
-        private Graphics gFlaeche;
-        private Int32 game_state;
-        private Int32 old_x, old_y;
-        private Bitmap terrain, rock, castle;
-        private Boolean input_validater;
-        private SolidBrush hovering;
+        //Grafiken/Bitmaps
+        private Graphics gFlaeche; //Zeichenfläche in der PictureBox
+        private Bitmap terrain, rock, castle; //Bitmaps für Texturen
+        
+        private Int32 game_state; //Status im Spiel
+        private Int32 Mover_count;
+
+        //Buffer für flackerfreies Spielen
         public BufferedGraphicsContext con;
         public BufferedGraphics buffer;
+
+        private Boolean input_validater; //Prüfvariable für Eingaben im Lvl-Editor
+        private SolidBrush selector;
         private KeyEventArgs key;
-        private Int32 Mover_count;
-       
 
         public Form1()
         {
             InitializeComponent();
-            Length = pbSpielbrett.Size.Width;
-            
             game_state = 0;
-            old_x = 0;old_y = 0;
 
             con = BufferedGraphicsManager.Current;
-            
-            hovering = new SolidBrush(Color.FromArgb(120, 255, 255, 0));
+
             //Grafiken laden
             terrain = new Bitmap(Properties.Resources.stone);
             rock = new Bitmap(Properties.Resources.rock);
             castle = new Bitmap(Properties.Resources.house);
             
+            //Brush(es)
+            selector = new SolidBrush(Color.FromArgb(120, 255, 255, 0));
 
         }
 
@@ -52,7 +53,6 @@ namespace ProjectX
         {
 
         }
-
 
         private void pbSpielbrett_Paint(object sender, PaintEventArgs e)
         {
@@ -64,19 +64,17 @@ namespace ProjectX
             try
             {   
                 zeichnen();
-                
             }
             catch (Exception ex)
-            { spielbrett.Stop(); game_state = 0; MessageBox.Show("Fehler: " + ex.Message); }
-
+            { /*spielbrett.Stop(); game_state = 0; MessageBox.Show("Fehler: " + ex.Message);*/ }
         }
 
         public void spieler_zeichnen()
         {
             //Spieler zeichnen
-            for (Int32 i = 0; i < players; i++)
+            for (Int32 i = 0; i < brett.getplayers(); i++)
             {
-               buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x(), spieler[i].getpos_y(), brett.getflen() - 1, brett.getflen() - 1);
+                buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x() * brett.getflen() + spieler[i].getanimationoffset_x(), spieler[i].getpos_y() * brett.getflen() + spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
             }
         }
 
@@ -88,10 +86,11 @@ namespace ProjectX
                 if (brett.getFeld(e.X / brett.getflen(),e.Y / brett.getflen())!=3)
                 {
                     brett.setFeld(e.X / brett.getflen(), e.Y / brett.getflen(), 3);
-                    brett.resetFeld(old_x, old_y);
-
-                    old_x = e.X / brett.getflen();
-                    old_y = e.Y / brett.getflen();
+                    
+                    //Der Status des alten Feldes aufOriginal-Wert, damit das blinken des Selektors aufhört
+                    brett.resetFeld(brett.getSelectorx(), brett.getSelectory());
+                    brett.setSelectorx(e.X / brett.getflen());
+                    brett.setSelectory(e.Y / brett.getflen());
                 }   
             }
         }
@@ -106,7 +105,7 @@ namespace ProjectX
             {
                 for (Int32 j = 0; j < brett.getRange(); j++)
                 {
-                    
+                    //Das originale Feld durchgehen
                     switch(brett.getRealFeld(i,j))
                     {   case 0:
                             buffer.Graphics.DrawImage(terrain, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
@@ -119,28 +118,27 @@ namespace ProjectX
                         case 2:
                         buffer.Graphics.DrawImage(rock, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
-
-                        
                     }
+
+                    //Das sichtbare Feld durchgehen
                     switch (brett.getFeld(i, j))
                     {
                         case 3:
-                            if (brett.hoverstate() < 2)
+                            if (brett.selectstate() < 2)
                             {
-                                buffer.Graphics.FillRectangle(hovering, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+                                buffer.Graphics.FillRectangle(selector, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                             }
-                            brett.hoverup();
-                            if (brett.hoverstate() == 3) brett.hoverclean();
+                            brett.drawselector();
+                            if (brett.selectstate() == 3) brett.selectorclean();
                             break;
                     }
                 }
-
+                
                 spieler_zeichnen();
             }
-
+            //Buffer in GFlaeche zeichnen
             buffer.Render();
-            buffer.Render(gFlaeche);
-            
+            buffer.Render(gFlaeche);          
         }
 
 
@@ -159,15 +157,10 @@ namespace ProjectX
                 gFlaeche.Clear(Color.Black);
                 gFlaeche.Dispose();
             }
-
             //Spieleranzahl ermitteln
             try
             {
-                if (Convert.ToInt32(tbPlayers.Text) <= 4 && Convert.ToInt32(tbPlayers.Text) >= 2)
-                {
-                    players = Convert.ToInt32(tbPlayers.Text);
-                }
-                else
+                if (!(Convert.ToInt32(tbPlayers.Text) <= 4 && Convert.ToInt32(tbPlayers.Text) >= 2 && tbPlayers.Text!=String.Empty))
                 {
                     input_validater = false;
                     MessageBox.Show("Die Spieleranzahl ist ungültig. Die Anzahl muss zwischen 2 und 4 liegen", "Fehler");
@@ -182,7 +175,7 @@ namespace ProjectX
             catch (FormatException f)
             {
                 input_validater = false;
-                MessageBox.Show("Überprüfen Sie die die Eingabefelder auf Korrektheit!", f.Message, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                MessageBox.Show("Überprüfen Sie die die Eingabefelder auf Korrektheit!\nSie können auch den \"Zurücksetzen\"-Button verwenden.", f.Message, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
             //<- Ende Spieleranzahl ermitteln
 
@@ -190,25 +183,27 @@ namespace ProjectX
             {
                 try
                 {
-                    brett = new cbrett(this);
+                    brett = new cbrett(this, pbSpielbrett.Width);
                     //Neues Spiel initialisieren
                     brett.generate_map();
                     labels_on();
                     game_state = 1;
+                    brett.setmaxplayers(Convert.ToInt32(tbPlayers.Text));
 
                     //Spieler initialisieren
-                    spieler = new cplayer[players];
-                    for (Int32 i = 0; i < players; i++)
+                    spieler = new cplayer[brett.getplayers()];
+                    for (Int32 i = 0; i < brett.getplayers(); i++)
                         spieler[i] = new cplayer(i, brett);
 
-                    //<- Ende Neues Spiel
-
+                    //<- Ende Neues Spiel                  
+                    hide_options();
+                    
                     //Timer starten
                     spielbrett.Start();
                 }
                 catch (Exception ex)
                 { MessageBox.Show("Unerwarteter Fehler. Scheinbar gab es ein Fehler beim erstellen der Map. Bitte versuche es erneut.\nDebug:\n\n" + ex.Message.ToString(), "Fehler beim Erstellen der Karte"); }
-            }
+            }      
         }
 
         private void pbSpielbrett_MouseClick(object sender, MouseEventArgs e)
@@ -226,14 +221,10 @@ namespace ProjectX
             lblZug.Visible = true;
         }
 
-        public void labels_off()
+        public void hide_options()
         {
-            lblKondition.Visible = false;
-            lblLevel.Visible = false;
-            lblPunkte.Visible = false;
-            lblRadius.Visible = false;
-            lblSpieler.Visible = false;
-            lblZug.Visible = false;
+            gbLevelEditor.Visible = false;
+            btnStart.Visible = false;
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -244,7 +235,7 @@ namespace ProjectX
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            if (!Mover.Enabled)
+            if (!Mover.Enabled && brett != null) //&& (e.KeyCode == Keys.Up||e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
             {
                 key = e;
                 Mover_count = 0;
@@ -254,57 +245,88 @@ namespace ProjectX
 
         private void Mover_Tick(object sender, EventArgs e)
         {
+            if (Mover_count >= 9) { Mover.Stop(); Mover.Dispose(); spieler[brett.getactive()].clean_target(); }
+            Mover_count++;
             switch (key.KeyCode)
             {
                 case Keys.Up:
-                        hochlaufen();
+                    if (spieler[brett.getactive()].getpos_y() > 0)
+                    {
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_y() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y()-1) != 2)
+                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y()-1);
+
+                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        {
+                            if (spieler[brett.getactive()].getpos_y() > spieler[brett.getactive()].gettarget_y())
+                             hochlaufen(); 
+                        }
+                    }
                     break;
                 case Keys.Down:
-                        runterfallen();
+                    if (spieler[brett.getactive()].getpos_y() < brett.getRange() - 1)
+                    {
+                        if(brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2)
+                        {
+                            while (brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2 && spieler[brett.getactive()].getpos_y() < brett.getRange() -1)
+                            {
+                                spieler[brett.getactive()].setpos(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1);
+                                runterfallen();
+                            }
+                        }
+                    }
                     break;
                 case Keys.Left:
-                        linkslaufen();
+                    if (spieler[brett.getactive()].getpos_x() > 0)
+                    {
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x()-1, spieler[brett.getactive()].getpos_y()) != 2)
+                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x()-1, spieler[brett.getactive()].getpos_y());
+
+                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        {
+                            if (spieler[brett.getactive()].getpos_x() > spieler[brett.getactive()].gettarget_x())
+                                linkslaufen();
+                        }
+                    }
                     break;
                 case Keys.Right:
-                        rechtslaufen();
+                    if (spieler[brett.getactive()].getpos_x() < brett.getRange()-1)
+                    {
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() +1, spieler[brett.getactive()].getpos_y()) != 2)
+                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x() + 1, spieler[brett.getactive()].getpos_y());
+
+                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        {
+                            if (spieler[brett.getactive()].getpos_x() < spieler[brett.getactive()].gettarget_x())
+                                rechtslaufen();
+                        }
+                    }
                     break;
 
             }
-            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
-            Mover_count++;
-            if (Mover_count == 10) Mover.Stop();
-            
+            //spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
         }
 
-        public Int32 zuIndex(Int32 coords)
-        {
-            return coords / brett.getflen();
-        }
+
+        //Methoden zum Laufen, nur für Animation
         public void hochlaufen()
         {
-
-            if (spieler[brett.getactive()].getpos_y() > 0 && brett.getRealFeld(zuIndex(spieler[0].getpos_x()),(spieler[0].getpos_y() - brett.getflen() / 10)/brett.getflen()) != 2)
-                spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() - brett.getflen() / 10);
+            if ((spieler[brett.getactive()].getpos_y() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_y() - brett.getStep()) > (spieler[brett.getactive()].gettarget_y() * brett.getflen()))
+                spieler[brett.getactive()].setanimationoffset_y(spieler[brett.getactive()].getanimationoffset_y() - brett.getStep());
         }
         public void linkslaufen()
         {
-            if (spieler[brett.getactive()].getpos_x() > 0 && brett.getRealFeld((spieler[0].getpos_x()-(brett.getflen()/10))/brett.getflen(), zuIndex(spieler[0].getpos_y())) != 2)
-            spieler[brett.getactive()].setpos(spieler[0].getpos_x() - brett.getflen() / 10, spieler[0].getpos_y());
+            if ((spieler[brett.getactive()].getpos_x() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_x() - brett.getStep()) > (spieler[brett.getactive()].gettarget_x() * brett.getflen()))
+                spieler[brett.getactive()].setanimationoffset_x(spieler[brett.getactive()].getanimationoffset_x() - brett.getStep());
         }
         public void rechtslaufen()
         {
-            if (spieler[brett.getactive()].getpos_x() < brett.getflen()*brett.getRange()-brett.getflen() && brett.getRealFeld(zuIndex((spieler[0].getpos_x() + (brett.getflen()))), zuIndex(spieler[0].getpos_y())) != 2)
-                spieler[brett.getactive()].setpos(spieler[0].getpos_x() + brett.getflen() / 10, spieler[0].getpos_y());
+            if ((spieler[brett.getactive()].getpos_x() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_x() + brett.getStep()) < (spieler[brett.getactive()].gettarget_x() * brett.getflen()))
+                spieler[brett.getactive()].setanimationoffset_x(spieler[brett.getactive()].getanimationoffset_x() + brett.getStep());
         }
         public void runterfallen()
         {
-            //spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() + brett.getflen() / 10);
-
-                while (brett.getRealFeld(zuIndex(spieler[0].getpos_x()), (spieler[0].getpos_y() ) / brett.getflen()+1) != 2 && spieler[brett.getactive()].getpos_y() < brett.getflen() * brett.getRange() - brett.getflen())
-                {
-                    spieler[brett.getactive()].setpos(spieler[0].getpos_x(), spieler[0].getpos_y() + brett.getflen() / 10);
-                }
-
+            if ((spieler[brett.getactive()].getpos_y() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_y() + brett.getStep()) < (spieler[brett.getactive()].gettarget_y() * brett.getflen()))
+                spieler[brett.getactive()].setanimationoffset_y(spieler[brett.getactive()].getanimationoffset_y() + brett.getStep());
         }
     }  
 }
