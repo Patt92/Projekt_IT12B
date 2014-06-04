@@ -138,9 +138,30 @@ namespace ProjectX
             }
             //Buffer in GFlaeche zeichnen
             buffer.Render();
-            buffer.Render(gFlaeche);          
+            buffer.Render(gFlaeche);
+
+            play();
+            
         }
 
+        public void play()
+        {
+            if (!Mover.Enabled)
+            {
+
+                push_stats();
+                if (spieler[brett.getactive()].getmovement() == 0)
+                {
+                    brett.nextplayer();
+                    spieler[brett.getactive()].nextturn(brett.getLevel());
+                }
+            }
+        }
+
+        private void push_stats()
+        {
+            lblcondition.Text = spieler[brett.getactive()].getmovement().ToString();
+        }
 
         private void Form1_Resize(object sender, EventArgs e)
         {
@@ -154,8 +175,13 @@ namespace ProjectX
 
             if (gFlaeche != null)
             {
-                gFlaeche.Clear(Color.Black);
-                gFlaeche.Dispose();
+                try
+                {
+                    gFlaeche.Clear(Color.Black);
+                    gFlaeche.Dispose();
+                }
+                catch
+                {/*Kein Grafics-Objekt*/}
             }
             //Spieleranzahl ermitteln
             try
@@ -200,6 +226,7 @@ namespace ProjectX
                     
                     //Timer starten
                     spielbrett.Start();
+                    spieler[brett.getactive()].nextturn(brett.getLevel());
                 }
                 catch (Exception ex)
                 { MessageBox.Show("Unerwarteter Fehler. Scheinbar gab es ein Fehler beim erstellen der Map. Bitte versuche es erneut.\nDebug:\n\n" + ex.Message.ToString(), "Fehler beim Erstellen der Karte"); }
@@ -219,12 +246,14 @@ namespace ProjectX
             lblRadius.Visible = true;
             lblSpieler.Visible = true;
             lblZug.Visible = true;
+            lblcondition.Visible = true;
         }
 
         public void hide_options()
         {
             gbLevelEditor.Visible = false;
             btnStart.Visible = false;
+            btnStart.Enabled = false;
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -250,11 +279,13 @@ namespace ProjectX
             switch (key.KeyCode)
             {
                 case Keys.Up:
-                    if (spieler[brett.getactive()].getpos_y() > 0)
+                    if (spieler[brett.getactive()].getpos_y() > 0 && spieler[brett.getactive()].getmovement()>1)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_y() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y()-1) != 2)
-                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y()-1);
-
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_y() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() - 1) != 2)
+                        {
+                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() - 1);
+                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 2);
+                        }
                         if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
                         {
                             if (spieler[brett.getactive()].getpos_y() > spieler[brett.getactive()].gettarget_y())
@@ -263,8 +294,10 @@ namespace ProjectX
                     }
                     break;
                 case Keys.Down:
-                    if (spieler[brett.getactive()].getpos_y() < brett.getRange() - 1)
+                    if (spieler[brett.getactive()].getpos_y() < brett.getRange() - 1 && spieler[brett.getactive()].getmovement() > 0)
                     {
+                        if (Mover_count == 1) spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+
                         if(brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2)
                         {
                             while (brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2 && spieler[brett.getactive()].getpos_y() < brett.getRange() -1)
@@ -276,11 +309,13 @@ namespace ProjectX
                     }
                     break;
                 case Keys.Left:
-                    if (spieler[brett.getactive()].getpos_x() > 0)
+                    if (spieler[brett.getactive()].getpos_x() > 0 && spieler[brett.getactive()].getmovement() > 0)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x()-1, spieler[brett.getactive()].getpos_y()) != 2)
-                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x()-1, spieler[brett.getactive()].getpos_y());
-
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() - 1, spieler[brett.getactive()].getpos_y()) != 2)
+                        {
+                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x() - 1, spieler[brett.getactive()].getpos_y());
+                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+                        }
                         if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
                         {
                             if (spieler[brett.getactive()].getpos_x() > spieler[brett.getactive()].gettarget_x())
@@ -289,11 +324,13 @@ namespace ProjectX
                     }
                     break;
                 case Keys.Right:
-                    if (spieler[brett.getactive()].getpos_x() < brett.getRange()-1)
+                    if (spieler[brett.getactive()].getpos_x() < brett.getRange() - 1 && spieler[brett.getactive()].getmovement() > 0)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() +1, spieler[brett.getactive()].getpos_y()) != 2)
+                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() + 1, spieler[brett.getactive()].getpos_y()) != 2)
+                        {
                             spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x() + 1, spieler[brett.getactive()].getpos_y());
-
+                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+                        }
                         if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
                         {
                             if (spieler[brett.getactive()].getpos_x() < spieler[brett.getactive()].gettarget_x())
@@ -303,7 +340,6 @@ namespace ProjectX
                     break;
 
             }
-            //spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
         }
 
 

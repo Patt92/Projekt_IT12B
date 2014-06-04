@@ -117,10 +117,10 @@ namespace ProjectX
         public void setmovement(Int32 m)
         { movement = m; }
 
-        public void generate_difficulty(Int32 level)
+        public void nextturn(Int32 level)
         {
-            setmovement(Convert.ToInt32(max_range * 0.75 - level/10));
-
+            setmovement(movement+Convert.ToInt32(max_range - level/10));
+            if (movement <3 ) setmovement(3);
         }
 
     }

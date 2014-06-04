@@ -31,12 +31,10 @@
             this.components = new System.ComponentModel.Container();
             this.pbSpielbrett = new System.Windows.Forms.PictureBox();
             this.spielbrett = new System.Windows.Forms.Timer(this.components);
-            this.pbInfo = new System.Windows.Forms.PictureBox();
             this.lblSpieler = new System.Windows.Forms.Label();
             this.lblZug = new System.Windows.Forms.Label();
             this.lblPunkte = new System.Windows.Forms.Label();
             this.lblKondition = new System.Windows.Forms.Label();
-            this.pbSettings = new System.Windows.Forms.PictureBox();
             this.lblLevel = new System.Windows.Forms.Label();
             this.btnStart = new System.Windows.Forms.Button();
             this.tbRange = new System.Windows.Forms.TextBox();
@@ -50,12 +48,12 @@
             this.lblPlayers = new System.Windows.Forms.Label();
             this.lblTurn = new System.Windows.Forms.Label();
             this.lblPoints = new System.Windows.Forms.Label();
-            this.lvlcondition = new System.Windows.Forms.Label();
+            this.lblcondition = new System.Windows.Forms.Label();
             this.lblLvl = new System.Windows.Forms.Label();
+            this.pnlInfo = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbSettings)).BeginInit();
             this.gbLevelEditor.SuspendLayout();
+            this.pnlInfo.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbSpielbrett
@@ -64,7 +62,7 @@
             this.pbSpielbrett.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pbSpielbrett.Location = new System.Drawing.Point(-2, -1);
             this.pbSpielbrett.Name = "pbSpielbrett";
-            this.pbSpielbrett.Size = new System.Drawing.Size(720, 720);
+            this.pbSpielbrett.Size = new System.Drawing.Size(850, 850);
             this.pbSpielbrett.TabIndex = 0;
             this.pbSpielbrett.TabStop = false;
             this.pbSpielbrett.Paint += new System.Windows.Forms.PaintEventHandler(this.pbSpielbrett_Paint);
@@ -75,22 +73,13 @@
             // 
             this.spielbrett.Tick += new System.EventHandler(this.Spielbrett_Tick);
             // 
-            // pbInfo
-            // 
-            this.pbInfo.BackColor = System.Drawing.Color.Black;
-            this.pbInfo.Location = new System.Drawing.Point(724, -1);
-            this.pbInfo.Name = "pbInfo";
-            this.pbInfo.Size = new System.Drawing.Size(285, 219);
-            this.pbInfo.TabIndex = 1;
-            this.pbInfo.TabStop = false;
-            // 
             // lblSpieler
             // 
             this.lblSpieler.AutoSize = true;
             this.lblSpieler.BackColor = System.Drawing.Color.Black;
             this.lblSpieler.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSpieler.ForeColor = System.Drawing.Color.White;
-            this.lblSpieler.Location = new System.Drawing.Point(743, 9);
+            this.lblSpieler.Location = new System.Drawing.Point(3, 3);
             this.lblSpieler.Name = "lblSpieler";
             this.lblSpieler.Size = new System.Drawing.Size(69, 24);
             this.lblSpieler.TabIndex = 2;
@@ -103,7 +92,7 @@
             this.lblZug.BackColor = System.Drawing.Color.Black;
             this.lblZug.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblZug.ForeColor = System.Drawing.Color.White;
-            this.lblZug.Location = new System.Drawing.Point(743, 50);
+            this.lblZug.Location = new System.Drawing.Point(255, 3);
             this.lblZug.Name = "lblZug";
             this.lblZug.Size = new System.Drawing.Size(43, 24);
             this.lblZug.TabIndex = 3;
@@ -116,7 +105,7 @@
             this.lblPunkte.BackColor = System.Drawing.Color.Black;
             this.lblPunkte.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPunkte.ForeColor = System.Drawing.Color.White;
-            this.lblPunkte.Location = new System.Drawing.Point(743, 85);
+            this.lblPunkte.Location = new System.Drawing.Point(535, 3);
             this.lblPunkte.Name = "lblPunkte";
             this.lblPunkte.Size = new System.Drawing.Size(71, 24);
             this.lblPunkte.TabIndex = 4;
@@ -129,21 +118,12 @@
             this.lblKondition.BackColor = System.Drawing.Color.Black;
             this.lblKondition.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblKondition.ForeColor = System.Drawing.Color.White;
-            this.lblKondition.Location = new System.Drawing.Point(743, 122);
+            this.lblKondition.Location = new System.Drawing.Point(3, 38);
             this.lblKondition.Name = "lblKondition";
             this.lblKondition.Size = new System.Drawing.Size(90, 24);
             this.lblKondition.TabIndex = 5;
             this.lblKondition.Text = "Kondition:";
             this.lblKondition.Visible = false;
-            // 
-            // pbSettings
-            // 
-            this.pbSettings.BackColor = System.Drawing.Color.Black;
-            this.pbSettings.Location = new System.Drawing.Point(725, 225);
-            this.pbSettings.Name = "pbSettings";
-            this.pbSettings.Size = new System.Drawing.Size(284, 494);
-            this.pbSettings.TabIndex = 6;
-            this.pbSettings.TabStop = false;
             // 
             // lblLevel
             // 
@@ -151,7 +131,7 @@
             this.lblLevel.BackColor = System.Drawing.Color.Black;
             this.lblLevel.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblLevel.ForeColor = System.Drawing.Color.White;
-            this.lblLevel.Location = new System.Drawing.Point(743, 163);
+            this.lblLevel.Location = new System.Drawing.Point(535, 38);
             this.lblLevel.Name = "lblLevel";
             this.lblLevel.Size = new System.Drawing.Size(56, 24);
             this.lblLevel.TabIndex = 7;
@@ -281,7 +261,7 @@
             this.lblPlayers.BackColor = System.Drawing.Color.Black;
             this.lblPlayers.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPlayers.ForeColor = System.Drawing.Color.White;
-            this.lblPlayers.Location = new System.Drawing.Point(858, 9);
+            this.lblPlayers.Location = new System.Drawing.Point(78, 3);
             this.lblPlayers.Name = "lblPlayers";
             this.lblPlayers.Size = new System.Drawing.Size(0, 24);
             this.lblPlayers.TabIndex = 17;
@@ -293,7 +273,7 @@
             this.lblTurn.BackColor = System.Drawing.Color.Black;
             this.lblTurn.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTurn.ForeColor = System.Drawing.Color.White;
-            this.lblTurn.Location = new System.Drawing.Point(858, 50);
+            this.lblTurn.Location = new System.Drawing.Point(304, 3);
             this.lblTurn.Name = "lblTurn";
             this.lblTurn.Size = new System.Drawing.Size(0, 24);
             this.lblTurn.TabIndex = 18;
@@ -305,23 +285,23 @@
             this.lblPoints.BackColor = System.Drawing.Color.Black;
             this.lblPoints.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPoints.ForeColor = System.Drawing.Color.White;
-            this.lblPoints.Location = new System.Drawing.Point(858, 85);
+            this.lblPoints.Location = new System.Drawing.Point(612, 3);
             this.lblPoints.Name = "lblPoints";
             this.lblPoints.Size = new System.Drawing.Size(0, 24);
             this.lblPoints.TabIndex = 19;
             this.lblPoints.Visible = false;
             // 
-            // lvlcondition
+            // lblcondition
             // 
-            this.lvlcondition.AutoSize = true;
-            this.lvlcondition.BackColor = System.Drawing.Color.Black;
-            this.lvlcondition.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lvlcondition.ForeColor = System.Drawing.Color.White;
-            this.lvlcondition.Location = new System.Drawing.Point(858, 122);
-            this.lvlcondition.Name = "lvlcondition";
-            this.lvlcondition.Size = new System.Drawing.Size(0, 24);
-            this.lvlcondition.TabIndex = 20;
-            this.lvlcondition.Visible = false;
+            this.lblcondition.AutoSize = true;
+            this.lblcondition.BackColor = System.Drawing.Color.Black;
+            this.lblcondition.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblcondition.ForeColor = System.Drawing.Color.White;
+            this.lblcondition.Location = new System.Drawing.Point(93, 39);
+            this.lblcondition.Name = "lblcondition";
+            this.lblcondition.Size = new System.Drawing.Size(0, 24);
+            this.lblcondition.TabIndex = 20;
+            this.lblcondition.Visible = false;
             // 
             // lblLvl
             // 
@@ -329,32 +309,39 @@
             this.lblLvl.BackColor = System.Drawing.Color.Black;
             this.lblLvl.Font = new System.Drawing.Font("Calibri Light", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblLvl.ForeColor = System.Drawing.Color.White;
-            this.lblLvl.Location = new System.Drawing.Point(858, 163);
+            this.lblLvl.Location = new System.Drawing.Point(597, 38);
             this.lblLvl.Name = "lblLvl";
             this.lblLvl.Size = new System.Drawing.Size(0, 24);
             this.lblLvl.TabIndex = 21;
             this.lblLvl.Visible = false;
+            // 
+            // pnlInfo
+            // 
+            this.pnlInfo.BackColor = System.Drawing.Color.Black;
+            this.pnlInfo.Controls.Add(this.lblSpieler);
+            this.pnlInfo.Controls.Add(this.lblLvl);
+            this.pnlInfo.Controls.Add(this.lblPlayers);
+            this.pnlInfo.Controls.Add(this.lblcondition);
+            this.pnlInfo.Controls.Add(this.lblZug);
+            this.pnlInfo.Controls.Add(this.lblLevel);
+            this.pnlInfo.Controls.Add(this.lblPoints);
+            this.pnlInfo.Controls.Add(this.lblTurn);
+            this.pnlInfo.Controls.Add(this.lblPunkte);
+            this.pnlInfo.Controls.Add(this.lblKondition);
+            this.pnlInfo.Location = new System.Drawing.Point(0, 848);
+            this.pnlInfo.Name = "pnlInfo";
+            this.pnlInfo.Size = new System.Drawing.Size(848, 80);
+            this.pnlInfo.TabIndex = 22;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(1008, 721);
-            this.Controls.Add(this.lblLvl);
-            this.Controls.Add(this.lvlcondition);
-            this.Controls.Add(this.lblPoints);
-            this.Controls.Add(this.lblTurn);
-            this.Controls.Add(this.lblPlayers);
+            this.ClientSize = new System.Drawing.Size(846, 929);
+            this.Controls.Add(this.pnlInfo);
             this.Controls.Add(this.gbLevelEditor);
             this.Controls.Add(this.btnStart);
-            this.Controls.Add(this.lblLevel);
-            this.Controls.Add(this.pbSettings);
-            this.Controls.Add(this.lblKondition);
-            this.Controls.Add(this.lblPunkte);
-            this.Controls.Add(this.lblZug);
-            this.Controls.Add(this.lblSpieler);
-            this.Controls.Add(this.pbInfo);
             this.Controls.Add(this.pbSpielbrett);
             this.DoubleBuffered = true;
             this.KeyPreview = true;
@@ -364,12 +351,11 @@
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbInfo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbSettings)).EndInit();
             this.gbLevelEditor.ResumeLayout(false);
             this.gbLevelEditor.PerformLayout();
+            this.pnlInfo.ResumeLayout(false);
+            this.pnlInfo.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -377,12 +363,10 @@
 
         private System.Windows.Forms.PictureBox pbSpielbrett;
         private System.Windows.Forms.Timer spielbrett;
-        private System.Windows.Forms.PictureBox pbInfo;
         private System.Windows.Forms.Label lblSpieler;
         private System.Windows.Forms.Label lblZug;
         private System.Windows.Forms.Label lblPunkte;
         private System.Windows.Forms.Label lblKondition;
-        private System.Windows.Forms.PictureBox pbSettings;
         private System.Windows.Forms.Label lblLevel;
         private System.Windows.Forms.Button btnStart;
         public System.Windows.Forms.TextBox tbRange;
@@ -396,8 +380,9 @@
         private System.Windows.Forms.Label lblPlayers;
         private System.Windows.Forms.Label lblTurn;
         private System.Windows.Forms.Label lblPoints;
-        private System.Windows.Forms.Label lvlcondition;
+        private System.Windows.Forms.Label lblcondition;
         private System.Windows.Forms.Label lblLvl;
+        private System.Windows.Forms.Panel pnlInfo;
     }
 }
 

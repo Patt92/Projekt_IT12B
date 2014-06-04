@@ -199,10 +199,10 @@ namespace ProjectX
         }
         public Int32 getactive()
         { return active_player; }
-        public void nextplayer(Int32 max)
+        public void nextplayer()
         {
             active_player++;
-            if (active_player == max)
+            if (active_player == players)
                 active_player = 0;
         }
 
