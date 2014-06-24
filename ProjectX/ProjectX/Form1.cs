@@ -15,12 +15,11 @@ namespace ProjectX
     {
         //Selbstdefinierte Klassen siehe <Klassennamen>.cs
         public cbrett brett; //Spielbrettobjekt für Zugriff auf Felder
-        public cplayer[] spieler; //Spielerobjekte unbegrenzte Anzahl
 
         //Grafiken/Bitmaps
         private Graphics gFlaeche; //Zeichenfläche in der PictureBox
-        private Bitmap terrain, rock, castle; //Bitmaps für Texturen
-        
+        private Bitmap terrain, rock, castle, end; //Bitmaps für Texturen
+
         private Int32 game_state; //Status im Spiel
         private Int32 Mover_count;
 
@@ -40,13 +39,15 @@ namespace ProjectX
             con = BufferedGraphicsManager.Current;
 
             //Grafiken laden
-            terrain = new Bitmap(Properties.Resources.stone);
+            terrain = new Bitmap(Properties.Resources.boden);
             rock = new Bitmap(Properties.Resources.rock);
-            castle = new Bitmap(Properties.Resources.house);
-            
+            castle = new Bitmap(Properties.Resources.castle);
+            end = new Bitmap(Properties.Resources.endturn);
+
+
+
             //Brush(es)
             selector = new SolidBrush(Color.FromArgb(120, 255, 255, 0));
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -74,7 +75,9 @@ namespace ProjectX
             //Spieler zeichnen
             for (Int32 i = 0; i < brett.getplayers(); i++)
             {
-                buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x() * brett.getflen() + spieler[i].getanimationoffset_x(), spieler[i].getpos_y() * brett.getflen() + spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
+                buffer.Graphics.DrawImage(brett.spieler[i].getBitmap(), brett.spieler[i].getpos_x() * brett.getflen() + brett.spieler[i].getanimationoffset_x(), brett.spieler[i].getpos_y() * brett.getflen() + brett.spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
+                                
+                //buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x() * brett.getflen() + spieler[i].getanimationoffset_x(), spieler[i].getpos_y() * brett.getflen() + spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
             }
         }
 
@@ -136,31 +139,105 @@ namespace ProjectX
                 
                 spieler_zeichnen();
             }
+
             //Buffer in GFlaeche zeichnen
             buffer.Render();
             buffer.Render(gFlaeche);
-
             play();
             
         }
 
+
+        //Spielschleife
         public void play()
         {
             if (!Mover.Enabled)
             {
-
                 push_stats();
-                if (spieler[brett.getactive()].getmovement() == 0)
+                if (brett.Agetmovement() == 0)
                 {
-                    brett.nextplayer();
-                    spieler[brett.getactive()].nextturn(brett.getLevel());
+                    //next();
+                    pnlEnd.Visible = true;
                 }
+
+                if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1)
+                {
+                    if (pnlAction.Width == 0)
+                    {//Positioniere Infofeld X
+                        if (brett.Agetpos_x() <= brett.getRange() / 2)
+                            pnlAction.Location = new Point(brett.Agetpos_x() * brett.getflen() + brett.getflen(), pnlAction.Location.Y);
+                        else
+                            pnlAction.Location = new Point(brett.Agetpos_x() * brett.getflen() - 138, pnlAction.Location.Y);
+
+                        //Positioniere Infofeld Y
+                        if (brett.Agetpos_y() <= brett.getRange() / 2)
+                            pnlAction.Location = new Point(pnlAction.Location.X, brett.Agetpos_y() * brett.getflen());
+                        else
+                            pnlAction.Location = new Point(pnlAction.Location.X, brett.Agetpos_y() * brett.getflen()-151);
+                    }
+                    UpdateActionPanel();
+                    
+                    if(!brett.AgetActionHide())
+                        show_panel(pnlAction, 138, 151);
+
+                }
+                else if (pnlAction.Width != 0)
+                    hide_panel(pnlAction);
+
+            }
+            if (brett.LevelCleared())
+            {
+                brett.nextlevel(this,pbSpielbrett.Width);
             }
         }
 
+        public void UpdateActionPanel()
+        {
+            lblLifegauge.Text = brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) + "/" + brett.getMaxLife(brett.Agetpos_x(), brett.Agetpos_y());
+            lblAngriff.Text = brett.AgetAttack().ToString();
+            lblKritisch.Text = brett.AgetCrit().ToString() + " %";
+            Double lifeinpercentages = (Convert.ToDouble(brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())) / Convert.ToDouble(brett.getMaxLife(brett.Agetpos_x(), brett.Agetpos_y())));
+            pnlLeben.Width = Convert.ToInt32(lifeinpercentages * 125);
+            if(lifeinpercentages>0.5) pnlLeben.BackColor = Color.Lime;
+            else if(lifeinpercentages>0.3) pnlLeben.BackColor = Color.Yellow;
+            else pnlLeben.BackColor = Color.Red;
+        }
+
+        public void hide_panel(Panel p)
+        {p.Width = 0;  p.Height = 0;}
+
+        public void show_panel(Panel p, Int32 w, Int32 h)
+        {p.Width = w;  p.Height = h;}
+
+
+        //Nächster Zug
+        public void next()
+        {
+           pnlEnd.Visible = false;
+           btnAttack.Text = "Attacke!";
+           brett.nextplayer();
+           brett.Anextturn();
+        }
+
+        //Aktualisiere alle Labels
         private void push_stats()
         {
-            lblcondition.Text = spieler[brett.getactive()].getmovement().ToString();
+            lblcondition.Text = brett.Agetmovement().ToString();
+            lblPlayers.Text = (brett.getactive() + 1).ToString();
+            lblTurn.Text = brett.AgetTurn().ToString();
+            lblPoints.Text = brett.AgetPoints().ToString();
+            lblLvl.Text = (brett.getLevel()).ToString();
+
+            if (brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) > 0)
+            {
+                if (brett.Agetmovement() < 2)
+                    btnAttack.Text = "2 Kondition nötig";
+                else if (btnAttack.Text != "Attacke!")
+                    btnAttack.Text = "Attacke!";
+            }
+            else btnAttack.Text = "Bereits erobert!";
+           
+
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -209,24 +286,25 @@ namespace ProjectX
             {
                 try
                 {
-                    brett = new cbrett(this, pbSpielbrett.Width);
                     //Neues Spiel initialisieren
+                    brett = new cbrett(this, pbSpielbrett.Width);
                     brett.generate_map();
-                    labels_on();
+
+                    pnlInfo.Visible = true;
                     game_state = 1;
                     brett.setmaxplayers(Convert.ToInt32(tbPlayers.Text));
 
                     //Spieler initialisieren
-                    spieler = new cplayer[brett.getplayers()];
-                    for (Int32 i = 0; i < brett.getplayers(); i++)
-                        spieler[i] = new cplayer(i, brett);
+                    brett.initPlayers();
 
                     //<- Ende Neues Spiel                  
                     hide_options();
                     
                     //Timer starten
                     spielbrett.Start();
-                    spieler[brett.getactive()].nextturn(brett.getLevel());
+
+                    //Starte in Runde 1 (Nicht 0)
+                    brett.Anextturn();
                 }
                 catch (Exception ex)
                 { MessageBox.Show("Unerwarteter Fehler. Scheinbar gab es ein Fehler beim erstellen der Map. Bitte versuche es erneut.\nDebug:\n\n" + ex.Message.ToString(), "Fehler beim Erstellen der Karte"); }
@@ -235,18 +313,11 @@ namespace ProjectX
 
         private void pbSpielbrett_MouseClick(object sender, MouseEventArgs e)
         {
-            
-        }
-
-        public void labels_on()
-        {
-            lblKondition.Visible = true;
-            lblLevel.Visible = true;
-            lblPunkte.Visible = true;
-            lblRadius.Visible = true;
-            lblSpieler.Visible = true;
-            lblZug.Visible = true;
-            lblcondition.Visible = true;
+            if (brett.getSelectorx() == brett.Agetpos_x() && brett.getSelectory() == brett.Agetpos_y())
+            {
+                if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1 && brett.AgetActionHide())
+                    brett.AtoggleActionHide();
+            }
         }
 
         public void hide_options()
@@ -274,95 +345,143 @@ namespace ProjectX
 
         private void Mover_Tick(object sender, EventArgs e)
         {
-            if (Mover_count >= 9) { Mover.Stop(); Mover.Dispose(); spieler[brett.getactive()].clean_target(); }
+            if (Mover_count >= 9) { Mover.Stop(); Mover.Dispose(); brett.Aclean_target(); }
             Mover_count++;
             switch (key.KeyCode)
             {
                 case Keys.Up:
-                    if (spieler[brett.getactive()].getpos_y() > 0 && spieler[brett.getactive()].getmovement()>1)
+                    if (brett.Agetpos_y() > 0 && brett.Agetmovement()>1)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_y() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() - 1) != 2)
+                        if (Mover_count == 1 && brett.Agettarget_y() == -1 && brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() - 1) != 2)
                         {
-                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() - 1);
-                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 2);
+                            brett.Asettarget(brett.Agetpos_x(), brett.Agetpos_y() - 1);
+                            brett.Asetmovement(brett.Agetmovement() - 2);
                         }
-                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
                         {
-                            if (spieler[brett.getactive()].getpos_y() > spieler[brett.getactive()].gettarget_y())
+                            if (brett.Agetpos_y() > brett.Agettarget_y())
                              hochlaufen(); 
                         }
                     }
                     break;
                 case Keys.Down:
-                    if (spieler[brett.getactive()].getpos_y() < brett.getRange() - 1 && spieler[brett.getactive()].getmovement() > 0)
+                    if (brett.Agetpos_y() < brett.getRange() - 1 && brett.Agetmovement() > 0)
                     {
-                        if (Mover_count == 1) spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+                        if (Mover_count == 1) brett.Asetmovement(brett.Agetmovement() - 1);
 
-                        if(brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2)
+                        if(brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() + 1) != 2)
                         {
-                            while (brett.getRealFeld(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1) != 2 && spieler[brett.getactive()].getpos_y() < brett.getRange() -1)
+                            while (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() + 1) != 2 && brett.Agetpos_y() < brett.getRange() -1)
                             {
-                                spieler[brett.getactive()].setpos(spieler[brett.getactive()].getpos_x(), spieler[brett.getactive()].getpos_y() + 1);
+                                brett.Asetpos(brett.Agetpos_x(), brett.Agetpos_y() + 1);
                                 runterfallen();
                             }
                         }
                     }
                     break;
                 case Keys.Left:
-                    if (spieler[brett.getactive()].getpos_x() > 0 && spieler[brett.getactive()].getmovement() > 0)
+                    if (brett.Agetpos_x() > 0 && brett.Agetmovement() > 0)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() - 1, spieler[brett.getactive()].getpos_y()) != 2)
+                        if (Mover_count == 1 && brett.Agettarget_x() == -1 && brett.getRealFeld(brett.Agetpos_x() - 1, brett.Agetpos_y()) != 2)
                         {
-                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x() - 1, spieler[brett.getactive()].getpos_y());
-                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+                            brett.Asettarget(brett.Agetpos_x() - 1, brett.Agetpos_y());
+                            brett.Asetmovement(brett.Agetmovement() - 1);
                         }
-                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
                         {
-                            if (spieler[brett.getactive()].getpos_x() > spieler[brett.getactive()].gettarget_x())
+                            if (brett.Agetpos_x() > brett.Agettarget_x())
                                 linkslaufen();
                         }
                     }
                     break;
                 case Keys.Right:
-                    if (spieler[brett.getactive()].getpos_x() < brett.getRange() - 1 && spieler[brett.getactive()].getmovement() > 0)
+                    if (brett.Agetpos_x() < brett.getRange() - 1 && brett.Agetmovement() > 0)
                     {
-                        if (Mover_count == 1 && spieler[brett.getactive()].gettarget_x() == -1 && brett.getRealFeld(spieler[brett.getactive()].getpos_x() + 1, spieler[brett.getactive()].getpos_y()) != 2)
+                        if (Mover_count == 1 && brett.Agettarget_x() == -1 && brett.getRealFeld(brett.Agetpos_x() + 1, brett.Agetpos_y()) != 2)
                         {
-                            spieler[brett.getactive()].settarget(spieler[brett.getactive()].getpos_x() + 1, spieler[brett.getactive()].getpos_y());
-                            spieler[brett.getactive()].setmovement(spieler[brett.getactive()].getmovement() - 1);
+                            brett.Asettarget(brett.Agetpos_x() + 1, brett.Agetpos_y());
+                            brett.Asetmovement(brett.Agetmovement() - 1);
                         }
-                        if (spieler[brett.getactive()].gettarget_x() != -1 && spieler[brett.getactive()].gettarget_y() != -1)
+                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
                         {
-                            if (spieler[brett.getactive()].getpos_x() < spieler[brett.getactive()].gettarget_x())
+                            if (brett.Agetpos_x() < brett.Agettarget_x())
                                 rechtslaufen();
+                        }
+                    }
+                    break;
+                case Keys.E:
+                    if(Mover_count == 1)
+                        next();
+                    break;
+                case Keys.A:
+                    if (Mover_count == 1)
+                    {
+                        for (Int32 i = 0; i < brett.getRange(); i++)
+                        {
+                            for (Int32 j = 0; j < brett.getRange(); j++)
+                            {
+                                brett.Attack(i,j,100);
+                            }
                         }
                     }
                     break;
 
             }
+            hide_panel(pnlAction);
+            if (brett.AgetActionHide()) brett.AtoggleActionHide();
         }
 
 
         //Methoden zum Laufen, nur für Animation
         public void hochlaufen()
         {
-            if ((spieler[brett.getactive()].getpos_y() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_y() - brett.getStep()) > (spieler[brett.getactive()].gettarget_y() * brett.getflen()))
-                spieler[brett.getactive()].setanimationoffset_y(spieler[brett.getactive()].getanimationoffset_y() - brett.getStep());
+            if ((brett.Agetpos_y() * brett.getflen() + brett.Agetanimoffset_y() - brett.getStep()) > (brett.Agettarget_y() * brett.getflen()))
+                brett.Asetanimoffset_y(brett.Agetanimoffset_y() - brett.getStep());
         }
         public void linkslaufen()
         {
-            if ((spieler[brett.getactive()].getpos_x() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_x() - brett.getStep()) > (spieler[brett.getactive()].gettarget_x() * brett.getflen()))
-                spieler[brett.getactive()].setanimationoffset_x(spieler[brett.getactive()].getanimationoffset_x() - brett.getStep());
+            if ((brett.Agetpos_x() * brett.getflen() + brett.Agetanimoffset_x() - brett.getStep()) > (brett.Agettarget_x() * brett.getflen()))
+                brett.Asetanimoffset_x(brett.Agetanimoffset_x() - brett.getStep());
         }
         public void rechtslaufen()
         {
-            if ((spieler[brett.getactive()].getpos_x() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_x() + brett.getStep()) < (spieler[brett.getactive()].gettarget_x() * brett.getflen()))
-                spieler[brett.getactive()].setanimationoffset_x(spieler[brett.getactive()].getanimationoffset_x() + brett.getStep());
+            if ((brett.Agetpos_x() * brett.getflen() + brett.Agetanimoffset_x() + brett.getStep()) < (brett.Agettarget_x() * brett.getflen()))
+                brett.Asetanimoffset_x(brett.Agetanimoffset_x() + brett.getStep());
         }
         public void runterfallen()
         {
-            if ((spieler[brett.getactive()].getpos_y() * brett.getflen() + spieler[brett.getactive()].getanimationoffset_y() + brett.getStep()) < (spieler[brett.getactive()].gettarget_y() * brett.getflen()))
-                spieler[brett.getactive()].setanimationoffset_y(spieler[brett.getactive()].getanimationoffset_y() + brett.getStep());
+            if ((brett.Agetpos_y() * brett.getflen() + brett.Agetanimoffset_y() + brett.getStep()) < (brett.Agettarget_y() * brett.getflen()))
+                brett.Asetanimoffset_y(brett.Agetanimoffset_y() + brett.getStep());
+        }
+
+        private void pbSpielbrett_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void btnAttack_Click(object sender, EventArgs e)
+        {
+            if (brett.Agetmovement() > 1 && brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())>0)
+            {
+                brett.Asetmovement(brett.Agetmovement() - 2);
+                brett.Attack(brett.Agetpos_x(), brett.Agetpos_y(), brett.AgetAttack());
+                brett.AsetPoints(10);
+
+                if (brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) == 0)
+                    brett.AsetPoints(40);
+            }
+
+        }
+
+        private void pnlEnd_Paint(object sender, PaintEventArgs e)
+        {
+            pnlEnd.CreateGraphics().DrawImage(end, 0, 0, 326, 44);
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            brett.AtoggleActionHide();
+            hide_panel(pnlAction);
         }
     }  
 }

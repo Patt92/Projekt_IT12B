@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace ProjectX
 {
@@ -18,6 +19,19 @@ namespace ProjectX
         private Int32 player_nr;
         private Int32 max_range;
         private Int32 flen;
+        private Bitmap bild;
+
+        private Int32 attack;
+        private Int32 critical;
+
+        private bool action_hide;
+        
+        public void setBitmap(Bitmap b)
+        {
+            bild = b;
+        }
+        public Bitmap getBitmap()
+        { return bild; }
 
         public cplayer(Int32 pnr, cbrett b)
         {
@@ -26,6 +40,9 @@ namespace ProjectX
             movement = 0;
             player_nr = pnr;
             name = "Player " + pnr.ToString();
+            attack = 8 + b.getLevel();
+            critical = 33;
+            if (attack < 3) attack = 3;
 
             int x, y;
 
@@ -56,6 +73,7 @@ namespace ProjectX
             //Für Bewegungsanimation position+- Schritte
             animation_position = new Int32[2];
             Array.Clear(animation_position, 0, 2);
+
         }
 
 
@@ -67,7 +85,7 @@ namespace ProjectX
         
         public Int32 getpos_y()
         {   return position[1]; }
-        
+
         public void setpos(Int32 _x, Int32 _y)
         {   position[0] = _x;
             position[1] = _y;   }
@@ -91,8 +109,9 @@ namespace ProjectX
             
             target_position[0] = -1;
             target_position[1] = -1;
-
+            
             Array.Clear(animation_position, 0, 2);
+                        
         }
 
         //Animations-Methoden (Für die Berechnung der Bewegungsoffsets)
@@ -119,9 +138,30 @@ namespace ProjectX
 
         public void nextturn(Int32 level)
         {
+            turn++;
             setmovement(movement+Convert.ToInt32(max_range - level/10));
             if (movement <3 ) setmovement(3);
         }
+        public Int32 getTurn()
+        { return turn; }
+
+        public Int32 getPoints()
+        { return points; }
+
+        public void setPoints(Int32 p)
+        { points += p; }
+
+        public Int32 getCrit()
+        { return critical; }
+
+        public Int32 getAttack()
+        { return attack; }
+
+        public void toggleActionHide()
+        { action_hide = !action_hide; }
+
+        public Boolean getActionHide()
+        { return action_hide; }
 
     }
 }
