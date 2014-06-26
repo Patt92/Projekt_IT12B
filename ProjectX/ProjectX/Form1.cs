@@ -13,15 +13,15 @@ namespace ProjectX
 
     public partial class Form1 : Form
     {
-        //Selbstdefinierte Klassen siehe <Klassennamen>.cs
+        //Spielbrettobjekt brett: siehe cbrett.cs
         public cbrett brett; //Spielbrettobjekt für Zugriff auf Felder
+
+        //Konstanten
+        public const Int32 max_level = 50;
 
         //Grafiken/Bitmaps
         private Graphics gFlaeche; //Zeichenfläche in der PictureBox
-        private Bitmap terrain, rock, castle, end; //Bitmaps für Texturen
-
-        private Int32 game_state; //Status im Spiel
-        private Int32 Mover_count;
+        private Bitmap terrain, rock, castle, captured, end; //Bitmaps für Texturen
 
         //Buffer für flackerfreies Spielen
         public BufferedGraphicsContext con;
@@ -30,12 +30,22 @@ namespace ProjectX
         private Boolean input_validater; //Prüfvariable für Eingaben im Lvl-Editor
         private SolidBrush selector;
         private KeyEventArgs key;
+        private Int32 Mover_count;
+
+        //Action-Menu
+        private Font ActionText;
+        private Brush Balkenfarbe;
+        private Int32 ActionAlpha;
+        private Int32 balken;
+        private SolidBrush SBblack, SBwhite;
+        private Int32 action_x, action_y;
+        private String action;
 
         public Form1()
         {
             InitializeComponent();
-            game_state = 0;
 
+            //Buffermanager initialisieren
             con = BufferedGraphicsManager.Current;
 
             //Grafiken laden
@@ -43,59 +53,50 @@ namespace ProjectX
             rock = new Bitmap(Properties.Resources.rock);
             castle = new Bitmap(Properties.Resources.castle);
             end = new Bitmap(Properties.Resources.endturn);
-
-
+            captured = new Bitmap(Properties.Resources.castle_captured);
 
             //Brush(es)
             selector = new SolidBrush(Color.FromArgb(120, 255, 255, 0));
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pbSpielbrett_Paint(object sender, PaintEventArgs e)
-        {
-
+            ActionText = new Font("Tahoma", 10, FontStyle.Bold);
+            ActionAlpha = 0;
+            action = "Attacke!";
         }
 
         private void Spielbrett_Tick(object sender, EventArgs e) //Das muss überarbeitet werden, hatte bei mir nur so funktioniert
         {
             try
-            {   
+            {
                 zeichnen();
             }
-            catch (Exception ex)
-            { /*spielbrett.Stop(); game_state = 0; MessageBox.Show("Fehler: " + ex.Message);*/ }
+            catch { }
+           
         }
 
         public void spieler_zeichnen()
         {
             //Spieler zeichnen
             for (Int32 i = 0; i < brett.getplayers(); i++)
-            {
                 buffer.Graphics.DrawImage(brett.spieler[i].getBitmap(), brett.spieler[i].getpos_x() * brett.getflen() + brett.spieler[i].getanimationoffset_x(), brett.spieler[i].getpos_y() * brett.getflen() + brett.spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
-                                
-                //buffer.Graphics.FillRectangle(Brushes.Blue, spieler[i].getpos_x() * brett.getflen() + spieler[i].getanimationoffset_x(), spieler[i].getpos_y() * brett.getflen() + spieler[i].getanimationoffset_y(), brett.getflen() - 1, brett.getflen() - 1);
-            }
         }
 
         private void pbSpielbrett_MouseMove(object sender, MouseEventArgs e)
         {
-            //Auswahl im Feld Methode
-            if (game_state > 0)
+            try
             {
-                if (brett.getFeld(e.X / brett.getflen(),e.Y / brett.getflen())!=3)
-                {
-                    brett.setFeld(e.X / brett.getflen(), e.Y / brett.getflen(), 3);
-                    
-                    //Der Status des alten Feldes aufOriginal-Wert, damit das blinken des Selektors aufhört
-                    brett.resetFeld(brett.getSelectorx(), brett.getSelectory());
-                    brett.setSelectorx(e.X / brett.getflen());
-                    brett.setSelectory(e.Y / brett.getflen());
-                }   
+                //Selektor setzen
+                if (brett.getgamestate() == 1)
+                    if (brett.getFeld(e.X / brett.getflen(), e.Y / brett.getflen()) != 3)
+                    {
+                        brett.setFeld(e.X / brett.getflen(), e.Y / brett.getflen(), 3);
+
+                        //Der Status des alten Feldes auf Original-Wert, damit das blinken des Selektors aufhört
+                        brett.resetFeld(brett.getSelectorx(), brett.getSelectory());
+                        brett.setSelectorx(e.X / brett.getflen());
+                        brett.setSelectory(e.Y / brett.getflen());
+                    }
             }
+            catch { }
+
         }
 
 
@@ -104,6 +105,7 @@ namespace ProjectX
             buffer = con.Allocate(pbSpielbrett.CreateGraphics(), pbSpielbrett.DisplayRectangle);
             gFlaeche = pbSpielbrett.CreateGraphics();
 
+            //Das Spielfeld zeichnen
             for (Int32 i = 0; i < brett.getRange(); i++)
             {
                 for (Int32 j = 0; j < brett.getRange(); j++)
@@ -115,38 +117,115 @@ namespace ProjectX
                         break;
 
                         case 1:
-                        buffer.Graphics.DrawImage(castle, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+                            if(brett.getLife(i,j)>0)
+                                buffer.Graphics.DrawImage(castle, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+                            else
+                                buffer.Graphics.DrawImage(captured, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
 
                         case 2:
-                        buffer.Graphics.DrawImage(rock, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
+                            buffer.Graphics.DrawImage(rock, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                         break;
                     }
+                }
+            }
+            
+            //Spieler zeichnen
+            spieler_zeichnen();
 
+            //Overlays zeichnen
+            for (Int32 i = 0; i < brett.getRange(); i++)
+            {
+                for (Int32 j = 0; j < brett.getRange(); j++)
+                {
                     //Das sichtbare Feld durchgehen
                     switch (brett.getFeld(i, j))
                     {
+                        //selectstate ist für das Blinken zuständig
                         case 3:
-                            if (brett.selectstate() < 2)
+                            if (brett.selectstate() > 0 && brett.selectstate() < 20)
                             {
                                 buffer.Graphics.FillRectangle(selector, i * brett.getflen(), j * brett.getflen(), brett.getflen() - 1, brett.getflen() - 1);
                             }
-                            brett.drawselector();
-                            if (brett.selectstate() == 3) brett.selectorclean();
+                            brett.countselector();
+                            if (brett.selectstate() >= 40) brett.selectorclean();
                             break;
                     }
                 }
-                
-                spieler_zeichnen();
             }
 
-            //Buffer in GFlaeche zeichnen
+            if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1)
+            {
+                if (!brett.AgetActionHide() && !Mover.Enabled)
+                {
+                    UpdateAction();
+                    show_action();
+                }
+            }
+            else if (!brett.AgetActionHide())
+                brett.AtoggleActionHide();
+                //   hide_panel(pnlAction);
+
+            //Buffer in gFlaeche zeichnen
             buffer.Render();
             buffer.Render(gFlaeche);
-            play();
-            
+            play();    
         }
 
+        public void UpdateAction()
+        {
+            //Neues ActionPanel
+            Int32 x, y;
+
+            if (brett.Agetpos_x() <= brett.getRange() / 2)
+                x = brett.Agetpos_x() * brett.getflen() + brett.getflen();
+            else
+                x = brett.Agetpos_x() * brett.getflen() - 138;
+
+            //Positioniere Infofeld Y
+            if (brett.Agetpos_y() <= brett.getRange() / 2)
+                y = brett.Agetpos_y() * brett.getflen();
+            else
+                y = brett.Agetpos_y() * brett.getflen() - 150;
+
+            
+            if (ActionAlpha < 150)
+                ActionAlpha += 25;
+
+            SBblack = new SolidBrush(Color.FromArgb(ActionAlpha, 0, 0, 0));
+            SBwhite = new SolidBrush(Color.FromArgb(ActionAlpha + 80, 255, 255, 255));
+
+            Double lifeinpercentages = (Convert.ToDouble(brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())) / Convert.ToDouble(brett.getMaxLife()));
+            balken = Convert.ToInt32(lifeinpercentages * 125);
+
+            //Balkenfarbe einstellen
+            if (lifeinpercentages > 0.5) Balkenfarbe = Brushes.Lime;
+            else if (lifeinpercentages > 0.3) Balkenfarbe = Brushes.Yellow;
+            else Balkenfarbe = Brushes.Red;
+
+            action_x = x;
+            action_y = y;
+        }
+
+        public void show_action()
+        {
+            //Zeichne Feld
+            buffer.Graphics.DrawRectangle(Pens.Gray, action_x, action_y, 138, 150);
+            buffer.Graphics.FillRectangle(SBblack, action_x + 1, action_y + 1, 136, 148);
+
+            //Werte eintragen
+            buffer.Graphics.DrawString("Burg:", ActionText, SBwhite, new RectangleF(action_x + 7, action_y + 10, 50, 17));
+            buffer.Graphics.DrawString(brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()).ToString() + "/" + brett.getMaxLife().ToString(), ActionText, SBwhite, new RectangleF(action_x + 50, action_y + 10, 82, 17));
+            buffer.Graphics.FillRectangle(Balkenfarbe, action_x + 7, action_y + 30, balken, 15);
+            buffer.Graphics.DrawString("Angriff: " + brett.AgetAttack().ToString(), ActionText, SBwhite, new RectangleF(action_x + 7, action_y + 53, 138, 17));
+            buffer.Graphics.DrawString("Kritisch: " + brett.AgetCrit().ToString() + " %", ActionText, SBwhite, new RectangleF(action_x + 7, action_y + 75, 138, 17));
+            
+            //Button
+            buffer.Graphics.DrawRectangle(Pens.Gray, action_x+6, action_y+105, 125, 35);
+            buffer.Graphics.FillRectangle(SBblack, action_x + 7, action_y + 106, 123, 33);
+            buffer.Graphics.DrawString(action, ActionText, Brushes.White, new RectangleF(action_x + 10, action_y + 115, 125, 33));
+            //Ende neues ActionPanel
+        }
 
         //Spielschleife
         public void play()
@@ -155,36 +234,13 @@ namespace ProjectX
             {
                 push_stats();
                 if (brett.Agetmovement() == 0)
-                {
-                    //next();
                     pnlEnd.Visible = true;
-                }
 
-                if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1)
-                {
-                    if (pnlAction.Width == 0)
-                    {//Positioniere Infofeld X
-                        if (brett.Agetpos_x() <= brett.getRange() / 2)
-                            pnlAction.Location = new Point(brett.Agetpos_x() * brett.getflen() + brett.getflen(), pnlAction.Location.Y);
-                        else
-                            pnlAction.Location = new Point(brett.Agetpos_x() * brett.getflen() - 138, pnlAction.Location.Y);
-
-                        //Positioniere Infofeld Y
-                        if (brett.Agetpos_y() <= brett.getRange() / 2)
-                            pnlAction.Location = new Point(pnlAction.Location.X, brett.Agetpos_y() * brett.getflen());
-                        else
-                            pnlAction.Location = new Point(pnlAction.Location.X, brett.Agetpos_y() * brett.getflen()-151);
-                    }
-                    UpdateActionPanel();
-                    
-                    if(!brett.AgetActionHide())
-                        show_panel(pnlAction, 138, 151);
-
-                }
-                else if (pnlAction.Width != 0)
-                    hide_panel(pnlAction);
-
+                UpdateAction();
             }
+            else if(!brett.AgetActionHide())
+                brett.AtoggleActionHide();
+
             if (brett.LevelCleared())
             {
                 brett.nextlevel(this,pbSpielbrett.Width);
@@ -193,28 +249,30 @@ namespace ProjectX
 
         public void UpdateActionPanel()
         {
-            lblLifegauge.Text = brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) + "/" + brett.getMaxLife(brett.Agetpos_x(), brett.Agetpos_y());
-            lblAngriff.Text = brett.AgetAttack().ToString();
-            lblKritisch.Text = brett.AgetCrit().ToString() + " %";
-            Double lifeinpercentages = (Convert.ToDouble(brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())) / Convert.ToDouble(brett.getMaxLife(brett.Agetpos_x(), brett.Agetpos_y())));
-            pnlLeben.Width = Convert.ToInt32(lifeinpercentages * 125);
-            if(lifeinpercentages>0.5) pnlLeben.BackColor = Color.Lime;
-            else if(lifeinpercentages>0.3) pnlLeben.BackColor = Color.Yellow;
-            else pnlLeben.BackColor = Color.Red;
+
+            //ENTFERNEN!!
+            //lblLifegauge.Text = brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) + "/" + brett.getMaxLife();
+            //lblAngriff.Text = brett.AgetAttack().ToString();
+            //lblKritisch.Text = brett.AgetCrit().ToString() + " %";
+            //Double lifeinpercentages = (Convert.ToDouble(brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())) / Convert.ToDouble(brett.getMaxLife()));
+            //pnlLeben.Width = Convert.ToInt32(lifeinpercentages * 125);
+            //if(lifeinpercentages>0.5) pnlLeben.BackColor = Color.Lime;
+            //else if(lifeinpercentages>0.3) pnlLeben.BackColor = Color.Yellow;
+            //else pnlLeben.BackColor = Color.Red;
         }
 
-        public void hide_panel(Panel p)
-        {p.Width = 0;  p.Height = 0;}
+        //public void hide_panel(Panel p)
+        //{p.Width = 0;  p.Height = 0;}
 
-        public void show_panel(Panel p, Int32 w, Int32 h)
-        {p.Width = w;  p.Height = h;}
+        //public void show_panel(Panel p, Int32 w, Int32 h)
+        //{p.Width = w;  p.Height = h;}
 
 
         //Nächster Zug
         public void next()
         {
-           pnlEnd.Visible = false;
-           btnAttack.Text = "Attacke!";
+           if(pnlEnd.Visible) pnlEnd.Visible = false;
+           action = "Attacke!";
            brett.nextplayer();
            brett.Anextturn();
         }
@@ -231,11 +289,11 @@ namespace ProjectX
             if (brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) > 0)
             {
                 if (brett.Agetmovement() < 2)
-                    btnAttack.Text = "2 Kondition nötig";
-                else if (btnAttack.Text != "Attacke!")
-                    btnAttack.Text = "Attacke!";
+                    action = "2 Kondition nötig";
+                else if (action != "Attacke!")
+                    action = "Attacke!";
             }
-            else btnAttack.Text = "Bereits erobert!";
+            else action = "Bereits erobert!";
            
 
         }
@@ -260,18 +318,27 @@ namespace ProjectX
                 catch
                 {/*Kein Grafics-Objekt*/}
             }
-            //Spieleranzahl ermitteln
+            
             try
             {
+                //Spieleranzahl ermitteln
                 if (!(Convert.ToInt32(tbPlayers.Text) <= 4 && Convert.ToInt32(tbPlayers.Text) >= 2 && tbPlayers.Text!=String.Empty))
                 {
                     input_validater = false;
                     MessageBox.Show("Die Spieleranzahl ist ungültig. Die Anzahl muss zwischen 2 und 4 liegen", "Fehler");
                 }
 
-                if (Convert.ToInt32(tbRange.Text) < 8 || Convert.ToInt32(tbRange.Text) > 45)//hier wird eine Zusatzvariable eingefügt
+                //Spielfeldradius prüfen
+                if (Convert.ToInt32(tbRange.Text) < 6 || Convert.ToInt32(tbRange.Text) > 45)//hier wird eine Zusatzvariable eingefügt
                 {
                     MessageBox.Show("Fehler mit dem Spielfeldradius. Der Radius zwischen 8 und 45 sein", "Fehler mit dem Spielfeldradius", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                    input_validater = false;
+                }
+
+                //Level prüfen
+                if (Convert.ToInt32(tbLevel.Text) < 0 || Convert.ToInt32(tbLevel.Text) > max_level)
+                {
+                    MessageBox.Show("Fehler mit dem Level. Das Level muss zwischen 1 und " + max_level + " liegen");
                     input_validater = false;
                 }
             }
@@ -280,26 +347,49 @@ namespace ProjectX
                 input_validater = false;
                 MessageBox.Show("Überprüfen Sie die die Eingabefelder auf Korrektheit!\nSie können auch den \"Zurücksetzen\"-Button verwenden.", f.Message, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
-            //<- Ende Spieleranzahl ermitteln
 
             if (input_validater == true)
             {
                 try
                 {
                     //Neues Spiel initialisieren
+                    
+                    //Passe das Spiel an die Fenstergröße an
+                    if (pbSpielbrett.Width < this.Width && this.Width >= 763 && this.Height>=763)
+                    {
+                        if (this.Width > this.Height - 80)
+                        {
+                            pbSpielbrett.Height = this.Height;
+                            pbSpielbrett.Width = this.Height;
+                            pbSpielbrett.Height -= 100;
+                            pbSpielbrett.Width -= 100;
+                        }
+                        else if (this.Width >= 763 && this.Height >= 763)
+                        {
+                            pbSpielbrett.Height = this.Width;
+                            pbSpielbrett.Width = this.Width;
+                        }
+                        pnlInfo.Location = new Point(pbSpielbrett.Width/2 - 374, this.Height - 100);
+                    }
+
                     brett = new cbrett(this, pbSpielbrett.Width);
                     brett.generate_map();
 
                     pnlInfo.Visible = true;
-                    game_state = 1;
                     brett.setmaxplayers(Convert.ToInt32(tbPlayers.Text));
 
                     //Spieler initialisieren
                     brett.initPlayers();
 
+                    //Starte in Level x
+                    for (Int32 i = 1; i < Convert.ToInt32(tbLevel.Text); i++)
+                    {
+                        brett.nextlevel(this, pbSpielbrett.Width);
+                    }
+
                     //<- Ende Neues Spiel                  
                     hide_options();
-                    
+
                     //Timer starten
                     spielbrett.Start();
 
@@ -313,11 +403,34 @@ namespace ProjectX
 
         private void pbSpielbrett_MouseClick(object sender, MouseEventArgs e)
         {
-            if (brett.getSelectorx() == brett.Agetpos_x() && brett.getSelectory() == brett.Agetpos_y())
+            try
             {
-                if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1 && brett.AgetActionHide())
-                    brett.AtoggleActionHide();
+                if (brett.getgamestate() == 1)
+                {
+                    if (brett.getSelectorx() == brett.Agetpos_x() && brett.getSelectory() == brett.Agetpos_y())
+                    {
+                        if (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y()) == 1 && brett.AgetActionHide())
+                            brett.AtoggleActionHide();
+                    }
+                    if (e.X >= action_x + 6 && e.X <= action_x + 131 && e.Y >= action_y + 105 && e.Y <= action_y + 140)
+                    {
+                        if (brett.Agetmovement() > 1 && brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) > 0)
+                        {
+                            brett.Asetmovement(brett.Agetmovement() - 2);
+                            brett.Attack(brett.Agetpos_x(), brett.Agetpos_y(), brett.AgetAttack());
+                            brett.AsetPoints(10);
+
+                            //Burg besiegt
+                            if (brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) == 0)
+                            {
+                                brett.AsetPoints(40);
+                            }
+                        }
+                    }
+                      
+                }
             }
+            catch /*(NullReferenceException)*/{}
         }
 
         public void hide_options()
@@ -327,149 +440,69 @@ namespace ProjectX
             btnStart.Enabled = false;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void btnreset_Click(object sender, EventArgs e)
         {
             tbRange.Text = "8";
             tbPlayers.Text = "2";
+            tbLevel.Text = "1";
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            if (!Mover.Enabled && brett != null) //&& (e.KeyCode == Keys.Up||e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+            try
             {
-                key = e;
-                Mover_count = 0;
-                Mover.Start();
+                if (!Mover.Enabled && brett.getgamestate() == 1)
+                {
+                    key = e;
+                    Mover_count = 0;
+                    Mover.Start();
+                }
             }
+            catch { /*NullReferenceException abfangen*/ }
         }
 
         private void Mover_Tick(object sender, EventArgs e)
         {
+            //Halte den Ticker nach 9 Ticks an
             if (Mover_count >= 9) { Mover.Stop(); Mover.Dispose(); brett.Aclean_target(); }
+
             Mover_count++;
-            switch (key.KeyCode)
+
+            if (!brett.AgetActionHide())
+                brett.AtoggleActionHide();
+
+            if (Mover_count == 1)
             {
-                case Keys.Up:
-                    if (brett.Agetpos_y() > 0 && brett.Agetmovement()>1)
-                    {
-                        if (Mover_count == 1 && brett.Agettarget_y() == -1 && brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() - 1) != 2)
-                        {
-                            brett.Asettarget(brett.Agetpos_x(), brett.Agetpos_y() - 1);
-                            brett.Asetmovement(brett.Agetmovement() - 2);
-                        }
-                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
-                        {
-                            if (brett.Agetpos_y() > brett.Agettarget_y())
-                             hochlaufen(); 
-                        }
-                    }
-                    break;
-                case Keys.Down:
-                    if (brett.Agetpos_y() < brett.getRange() - 1 && brett.Agetmovement() > 0)
-                    {
-                        if (Mover_count == 1) brett.Asetmovement(brett.Agetmovement() - 1);
 
-                        if(brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() + 1) != 2)
-                        {
-                            while (brett.getRealFeld(brett.Agetpos_x(), brett.Agetpos_y() + 1) != 2 && brett.Agetpos_y() < brett.getRange() -1)
-                            {
-                                brett.Asetpos(brett.Agetpos_x(), brett.Agetpos_y() + 1);
-                                runterfallen();
-                            }
-                        }
-                    }
-                    break;
-                case Keys.Left:
-                    if (brett.Agetpos_x() > 0 && brett.Agetmovement() > 0)
-                    {
-                        if (Mover_count == 1 && brett.Agettarget_x() == -1 && brett.getRealFeld(brett.Agetpos_x() - 1, brett.Agetpos_y()) != 2)
-                        {
-                            brett.Asettarget(brett.Agetpos_x() - 1, brett.Agetpos_y());
-                            brett.Asetmovement(brett.Agetmovement() - 1);
-                        }
-                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
-                        {
-                            if (brett.Agetpos_x() > brett.Agettarget_x())
-                                linkslaufen();
-                        }
-                    }
-                    break;
-                case Keys.Right:
-                    if (brett.Agetpos_x() < brett.getRange() - 1 && brett.Agetmovement() > 0)
-                    {
-                        if (Mover_count == 1 && brett.Agettarget_x() == -1 && brett.getRealFeld(brett.Agetpos_x() + 1, brett.Agetpos_y()) != 2)
-                        {
-                            brett.Asettarget(brett.Agetpos_x() + 1, brett.Agetpos_y());
-                            brett.Asetmovement(brett.Agetmovement() - 1);
-                        }
-                        if (brett.Agettarget_x() != -1 && brett.Agettarget_y() != -1)
-                        {
-                            if (brett.Agetpos_x() < brett.Agettarget_x())
-                                rechtslaufen();
-                        }
-                    }
-                    break;
-                case Keys.E:
-                    if(Mover_count == 1)
+                switch (key.KeyCode)
+                {
+                    case Keys.Up:
+                            brett.hochlaufen();
+                        break;
+                    case Keys.Down:
+                            brett.runterfallen();
+                        break;
+                    case Keys.Left:
+                            brett.linkslaufen();
+                        break;
+                    case Keys.Right:
+                            brett.rechtslaufen();
+                        break;
+                    case Keys.E:
                         next();
-                    break;
-                case Keys.A:
-                    if (Mover_count == 1)
-                    {
-                        for (Int32 i = 0; i < brett.getRange(); i++)
-                        {
-                            for (Int32 j = 0; j < brett.getRange(); j++)
-                            {
-                                brett.Attack(i,j,100);
-                            }
-                        }
-                    }
-                    break;
-
+                        break;
+                    case Keys.A:
+                        brett.nextlevel(this, pbSpielbrett.Width);
+                        break;
+                }
             }
-            hide_panel(pnlAction);
-            if (brett.AgetActionHide()) brett.AtoggleActionHide();
-        }
-
-
-        //Methoden zum Laufen, nur für Animation
-        public void hochlaufen()
-        {
-            if ((brett.Agetpos_y() * brett.getflen() + brett.Agetanimoffset_y() - brett.getStep()) > (brett.Agettarget_y() * brett.getflen()))
-                brett.Asetanimoffset_y(brett.Agetanimoffset_y() - brett.getStep());
-        }
-        public void linkslaufen()
-        {
-            if ((brett.Agetpos_x() * brett.getflen() + brett.Agetanimoffset_x() - brett.getStep()) > (brett.Agettarget_x() * brett.getflen()))
-                brett.Asetanimoffset_x(brett.Agetanimoffset_x() - brett.getStep());
-        }
-        public void rechtslaufen()
-        {
-            if ((brett.Agetpos_x() * brett.getflen() + brett.Agetanimoffset_x() + brett.getStep()) < (brett.Agettarget_x() * brett.getflen()))
-                brett.Asetanimoffset_x(brett.Agetanimoffset_x() + brett.getStep());
-        }
-        public void runterfallen()
-        {
-            if ((brett.Agetpos_y() * brett.getflen() + brett.Agetanimoffset_y() + brett.getStep()) < (brett.Agettarget_y() * brett.getflen()))
-                brett.Asetanimoffset_y(brett.Agetanimoffset_y() + brett.getStep());
-        }
-
-        private void pbSpielbrett_Click(object sender, EventArgs e)
-        {
             
+            if (brett.AgetActionHide()) brett.AtoggleActionHide();
         }
 
         private void btnAttack_Click(object sender, EventArgs e)
         {
-            if (brett.Agetmovement() > 1 && brett.getLife(brett.Agetpos_x(), brett.Agetpos_y())>0)
-            {
-                brett.Asetmovement(brett.Agetmovement() - 2);
-                brett.Attack(brett.Agetpos_x(), brett.Agetpos_y(), brett.AgetAttack());
-                brett.AsetPoints(10);
-
-                if (brett.getLife(brett.Agetpos_x(), brett.Agetpos_y()) == 0)
-                    brett.AsetPoints(40);
-            }
+            //ENTFERNEN!!!
 
         }
 
@@ -481,7 +514,12 @@ namespace ProjectX
         private void btnClose_Click(object sender, EventArgs e)
         {
             brett.AtoggleActionHide();
-            hide_panel(pnlAction);
+            //hide_panel(pnlAction);
+        }
+
+        private void pbSpielbrett_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }  
 }

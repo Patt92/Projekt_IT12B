@@ -28,6 +28,7 @@ namespace ProjectX
         private Int32 castle_max_life;
         private Int32 selector_draw_count;
         private Int32 active_player;
+        private Int32 gamestate;
 
         //Spielerobjekte
         public cplayer[] spieler;
@@ -52,7 +53,7 @@ namespace ProjectX
             max_castle = max_range * max_range / 3;
 
             active_player = 0;
-
+            gamestate = 1;
             selector_draw_count = 0;
 
             selector_pos = new Int32[2];
@@ -60,6 +61,7 @@ namespace ProjectX
             
             //Größe des Fenster korrigieren
             f.Width = (flen * max_range) + 14; //14 ist der Rand von einem Windows 8 Fenster
+            f.Height = (flen * max_range) + 114;
             castle_max_life = 20 + level - 1;
         }
 
@@ -83,15 +85,19 @@ namespace ProjectX
 
             //Größe des Fenster korrigieren
             f.Width = (flen * max_range) + 14; //14 ist der Rand von einem Windows 8 Fenster
+            f.Height = (flen * max_range) + 114;
 
             castle_max_life = 20 + level - 1;
             generate_map();
+
+            initPlayers();
+
             Anextturn();
         }
 
         public void setFeld(Int32 i, Int32 j, Int32 val)
         {
-            if (i < max_range && j < max_range)
+            if (i < max_range && j < max_range && i>=0 && j>=0)
                 Map[i, j] = val;
         }
 
@@ -107,7 +113,7 @@ namespace ProjectX
             return Castle[x, y];
         }
 
-        public Int32 getMaxLife(Int32 x, Int32 y)
+        public Int32 getMaxLife()
         { return castle_max_life; }
 
         public void generate_map()
@@ -215,10 +221,12 @@ namespace ProjectX
 
         }
 
-        public void drawselector()
+        public void countselector()
         {selector_draw_count++;}
+
         public Int32 selectstate()
         { return selector_draw_count; }
+
         public void selectorclean()
         { selector_draw_count = 0; }
 
@@ -379,6 +387,90 @@ namespace ProjectX
             }
 
             return valid;
+        }
+
+        public void setgamestate(Int32 state)
+        { gamestate = state; }
+
+        public Int32 getgamestate()
+        { return gamestate; }
+
+        public void hochlaufen()
+        {
+            if (Agetpos_y() > 0 && Agetmovement() > 1)
+            {
+                if (Agettarget_y() == -1 && getRealFeld(Agetpos_x(), Agetpos_y() - 1) != 2)
+                {
+                    Asettarget(Agetpos_x(), Agetpos_y() - 1);
+                    Asetmovement(Agetmovement() - 2);
+                }
+                if (Agettarget_x() != -1 && Agettarget_y() != -1)
+                {
+                    if (Agetpos_y() > Agettarget_y())
+                    {
+                        if ((Agetpos_y() * getflen() + Agetanimoffset_y() - getStep()) > (Agettarget_y() * getflen()))
+                            Asetanimoffset_y(Agetanimoffset_y() - getStep());
+                    }
+                }
+            }  
+        }
+
+        public void linkslaufen()
+        {
+            if (Agetpos_x() > 0 && Agetmovement() > 0)
+            {
+                if (Agettarget_x() == -1 && getRealFeld(Agetpos_x() - 1, Agetpos_y()) != 2)
+                {
+                    Asettarget(Agetpos_x() - 1, Agetpos_y());
+                    Asetmovement(Agetmovement() - 1);
+                }
+                if (Agettarget_x() != -1 && Agettarget_y() != -1)
+                {
+                    if (Agetpos_x() > Agettarget_x())
+                    {
+                        if ((Agetpos_x() * getflen() + Agetanimoffset_x() - getStep()) > (Agettarget_x() * getflen()))
+                            Asetanimoffset_x(Agetanimoffset_x() - getStep());
+                    }
+                }
+            }  
+        }
+
+        public void rechtslaufen()
+        {
+            if (Agetpos_x() < getRange() - 1 && Agetmovement() > 0)
+            {
+                if (Agettarget_x() == -1 && getRealFeld(Agetpos_x() + 1, Agetpos_y()) != 2)
+                {
+                    Asettarget(Agetpos_x() + 1, Agetpos_y());
+                    Asetmovement(Agetmovement() - 1);
+                }
+                if (Agettarget_x() != -1 && Agettarget_y() != -1)
+                {
+                    if (Agetpos_x() < Agettarget_x())
+                    {
+                        if ((Agetpos_x() * getflen() + Agetanimoffset_x() + getStep()) < (Agettarget_x() * getflen()))
+                            Asetanimoffset_x(Agetanimoffset_x() + getStep());
+                    }
+                }
+            }    
+        }
+
+        public void runterfallen()
+        {
+            if (Agetpos_y() < getRange() - 1 && Agetmovement() > 0)
+            {
+                Asetmovement(Agetmovement() - 1);
+
+                if (getRealFeld(Agetpos_x(), Agetpos_y() + 1) != 2)
+                {
+                    while (getRealFeld(Agetpos_x(), Agetpos_y() + 1) != 2 && Agetpos_y() < getRange() - 1)
+                    {
+                        Asetpos(Agetpos_x(), Agetpos_y() + 1);
+                        if ((Agetpos_y() * getflen() + Agetanimoffset_y() + getStep()) < (Agettarget_y() * getflen()))
+                            Asetanimoffset_y(Agetanimoffset_y() + getStep());
+                    }
+                }
+            }      
         }
 
     }

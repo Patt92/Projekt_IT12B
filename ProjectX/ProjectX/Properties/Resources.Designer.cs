@@ -83,6 +83,16 @@ namespace ProjectX.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap castle_captured {
+            get {
+                object obj = ResourceManager.GetObject("castle_captured", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap endturn {
             get {
                 object obj = ResourceManager.GetObject("endturn", resourceCulture);

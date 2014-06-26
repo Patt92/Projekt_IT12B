@@ -44,26 +44,11 @@ namespace ProjectX
             critical = 33;
             if (attack < 3) attack = 3;
 
-            int x, y;
-
             max_range = b.getRange();
             flen = b.getflen();
 
-            //Startfelder für Spieler 1-4 setzen
-            if (pnr % 2 == 1)
-                x = 1;
-            else
-                x = b.getRange() - 2;
-
-            if (pnr == 2 || pnr == 3)
-                y = 1;
-            else
-                y = b.getRange() - 2;
-
-            //Spieler Position im Feld[x,y]
-            position = new Int32[2];
-            position[0] = x;
-            position[1] = y;
+            //Alle Spieler auf Startfelder setzen
+            place_players(b.getRange());
 
             //Target -1 = Kein Ziel (Clean Value)
             target_position = new Int32[2];
@@ -75,7 +60,26 @@ namespace ProjectX
             Array.Clear(animation_position, 0, 2);
 
         }
+        public void place_players(Int32 range)
+        {
+            int x, y;
 
+            //Startfelder für Spieler 1-4 setzen
+            if (player_nr % 2 == 1)
+                x = 1;
+            else
+                x = range - 2;
+
+            if (player_nr == 2 || player_nr == 3)
+                y = 1;
+            else
+                y = range - 2;
+
+            //Spieler Position im Feld[x,y]
+            position = new Int32[2];
+            position[0] = x;
+            position[1] = y;
+        }
 
         //Spielerpositions-Methoden:        
         
