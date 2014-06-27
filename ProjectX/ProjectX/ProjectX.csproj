@@ -121,6 +121,36 @@
   <ItemGroup>
     <None Include="bilder\castle_captured.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\Beige-background.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\background.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_spielstart.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_spielstart_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\cattura.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_editor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_editor_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_end.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bilder\button_end_hover.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

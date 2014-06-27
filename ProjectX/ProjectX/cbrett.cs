@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace ProjectX
 {
@@ -36,18 +37,15 @@ namespace ProjectX
         private Int32 players;
 
         //Allgemeiner Konstruktor      
-        public cbrett(Form1 f, Int32 pbLength)
+        public cbrett(Form1 f)
         {
             level = 1;
 
-            max_range = Convert.ToInt32(f.tbRange.Text); //tbRange wurde public gemacht, für Interaktion
+            max_range = Convert.ToInt32(8); //tbRange wurde public gemacht, für Interaktion
             
             Feld = new Int32[max_range, max_range];
             Map = new Int32[max_range, max_range];
             Castle = new Int32[max_range, max_range];
-
-            flen = pbLength / max_range;
-            step = flen / 10;
 
             max_disabled = max_range * max_range / 3;
             max_castle = max_range * max_range / 3;
@@ -60,12 +58,19 @@ namespace ProjectX
             Array.Clear(selector_pos, 0, 2);
             
             //Größe des Fenster korrigieren
-            f.Width = (flen * max_range) + 14; //14 ist der Rand von einem Windows 8 Fenster
-            f.Height = (flen * max_range) + 114;
+            //f.Width = (flen * max_range)+3; //14 ist der Rand von einem Windows 8 Fenster
+            //f.Height = (flen * max_range) + 30;
+
+            flen = (Screen.PrimaryScreen.Bounds.Height - 100) / max_range;
+            step = flen / 10;
+
+            f.Width = flen * max_range+5;
+            f.Height = flen * max_range+30;
+
             castle_max_life = 20 + level - 1;
         }
 
-        public void nextlevel(Form1 f, Int32 pbLen)
+        public void nextlevel(Form1 f)
         {
             Random zufall = new Random();
 
@@ -75,17 +80,16 @@ namespace ProjectX
             Map = new Int32[max_range, max_range];
             Castle = new Int32[max_range, max_range];
 
-            flen = pbLen / max_range;
-            step = flen / 10;
-
             max_disabled = max_range * max_range / 3;
             max_castle = max_range * max_range / 3;
 
             active_player = 0;
 
-            //Größe des Fenster korrigieren
-            f.Width = (flen * max_range) + 14; //14 ist der Rand von einem Windows 8 Fenster
-            f.Height = (flen * max_range) + 114;
+            flen = (Screen.PrimaryScreen.Bounds.Height - 100) / max_range;
+            step = flen / 10;
+
+            f.Width = flen * max_range+5;
+            f.Height = flen * max_range + 30;
 
             castle_max_life = 20 + level - 1;
             generate_map();
@@ -385,7 +389,6 @@ namespace ProjectX
                     if (Castle[i, j] != 0) valid = false;
                 }
             }
-
             return valid;
         }
 
