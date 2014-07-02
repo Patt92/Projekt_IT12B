@@ -30,22 +30,39 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.spielbrett = new System.Windows.Forms.Timer(this.components);
+            this.Spiel = new System.Windows.Forms.Timer(this.components);
             this.Mover = new System.Windows.Forms.Timer(this.components);
-            this.pbSpielbrett = new System.Windows.Forms.PictureBox();
             this.Hauptmenu = new System.Windows.Forms.Timer(this.components);
+            this.Editor = new System.Windows.Forms.Timer(this.components);
+            this.Spiel_Laden = new System.Windows.Forms.Timer(this.components);
+            this.pbSpielbrett = new System.Windows.Forms.PictureBox();
+            this.Anleitung = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pbSpielbrett)).BeginInit();
             this.SuspendLayout();
             // 
-            // spielbrett
+            // Spiel
             // 
-            this.spielbrett.Interval = 1;
-            this.spielbrett.Tick += new System.EventHandler(this.Spielbrett_Tick);
+            this.Spiel.Interval = 1;
+            this.Spiel.Tick += new System.EventHandler(this.Spielbrett_Tick);
             // 
             // Mover
             // 
             this.Mover.Interval = 15;
             this.Mover.Tick += new System.EventHandler(this.Mover_Tick);
+            // 
+            // Hauptmenu
+            // 
+            this.Hauptmenu.Interval = 1;
+            this.Hauptmenu.Tick += new System.EventHandler(this.Hauptmenu_Tick);
+            // 
+            // Editor
+            // 
+            this.Editor.Interval = 1;
+            this.Editor.Tick += new System.EventHandler(this.Editor_Tick);
+            // 
+            // Spiel_Laden
+            // 
+            this.Spiel_Laden.Tick += new System.EventHandler(this.Spiel_Laden_Tick);
             // 
             // pbSpielbrett
             // 
@@ -61,10 +78,9 @@
             this.pbSpielbrett.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pbSpielbrett_MouseClick);
             this.pbSpielbrett.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pbSpielbrett_MouseMove);
             // 
-            // Hauptmenu
+            // Anleitung
             // 
-            this.Hauptmenu.Interval = 1;
-            this.Hauptmenu.Tick += new System.EventHandler(this.Hauptmenu_Tick);
+            this.Anleitung.Tick += new System.EventHandler(this.Anleitung_Tick);
             // 
             // Form1
             // 
@@ -91,9 +107,12 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pbSpielbrett;
-        private System.Windows.Forms.Timer spielbrett;
+        private System.Windows.Forms.Timer Spiel;
         private System.Windows.Forms.Timer Mover;
         private System.Windows.Forms.Timer Hauptmenu;
+        private System.Windows.Forms.Timer Editor;
+        private System.Windows.Forms.Timer Spiel_Laden;
+        private System.Windows.Forms.Timer Anleitung;
     }
 }
 

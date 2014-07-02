@@ -1,0 +1,7 @@
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\bin\Release\Cattura.exe
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\bin\Release\Cattura.pdb
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Release\ProjectX.Form1.resources
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Release\ProjectX.Properties.Resources.resources
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Release\Cattura.csproj.GenerateResource.Cache
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Release\Cattura.exe
+C:\Projekt_IT12B\Projekt_IT12B\ProjectX\ProjectX\obj\x86\Release\Cattura.pdb

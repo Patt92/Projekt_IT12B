@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace ProjectX
 {
+    [Serializable]
     public class cbrett
     {
 
@@ -29,7 +30,6 @@ namespace ProjectX
         private Int32 castle_max_life;
         private Int32 selector_draw_count;
         private Int32 active_player;
-        private Int32 gamestate;
 
         //Spielerobjekte
         public cplayer[] spieler;
@@ -40,69 +40,68 @@ namespace ProjectX
         public cbrett(Form1 f)
         {
             level = 1;
-
-            max_range = Convert.ToInt32(8); //tbRange wurde public gemacht, für Interaktion
-            
-            Feld = new Int32[max_range, max_range];
-            Map = new Int32[max_range, max_range];
-            Castle = new Int32[max_range, max_range];
-
-            max_disabled = max_range * max_range / 3;
-            max_castle = max_range * max_range / 3;
-
-            active_player = 0;
-            gamestate = 1;
-            selector_draw_count = 0;
-
-            selector_pos = new Int32[2];
-            Array.Clear(selector_pos, 0, 2);
-            
-            //Größe des Fenster korrigieren
-            //f.Width = (flen * max_range)+3; //14 ist der Rand von einem Windows 8 Fenster
-            //f.Height = (flen * max_range) + 30;
-
-            flen = (Screen.PrimaryScreen.Bounds.Height - 100) / max_range;
-            step = flen / 10;
-
-            f.Width = flen * max_range+5;
-            f.Height = flen * max_range+30;
-
-            castle_max_life = 20 + level - 1;
+            max_range = 8; //tbRange wurde public gemacht, für Interaktion
+            init(f);
         }
 
         public void nextlevel(Form1 f)
         {
             Random zufall = new Random();
 
-            level++;
-            max_range = max_range + zufall.Next(0, 2);
+            if (max_range <= 45)
+            {
+                level++;
+                max_range = max_range + zufall.Next(0, 2);
+                init(f);
+                generate_map();
+                initPlayers();
+                Anextturn();
+            }
+            else
+            {
+                MessageBox.Show("Maximallevel erreicht. Herzlichen Glückwunsch!");
+            }
+
+        }
+
+        public void init(Form f)
+        {
             Feld = new Int32[max_range, max_range];
             Map = new Int32[max_range, max_range];
             Castle = new Int32[max_range, max_range];
+            castle_max_life = 20 + level - 1;
 
             max_disabled = max_range * max_range / 3;
             max_castle = max_range * max_range / 3;
 
             active_player = 0;
+            selector_draw_count = 0;
+
+            selector_pos = new Int32[2];
+            Array.Clear(selector_pos, 0, 2);
 
             flen = (Screen.PrimaryScreen.Bounds.Height - 100) / max_range;
             step = flen / 10;
 
-            f.Width = flen * max_range+5;
+            f.Width = flen * max_range + 5;
             f.Height = flen * max_range + 30;
+        }
 
-            castle_max_life = 20 + level - 1;
-            generate_map();
-
-            initPlayers();
-
-            Anextturn();
+        public void fix_window(Form f)
+        {
+            f.Width = flen * max_range + 5;
+            f.Height = flen * max_range + 30;
         }
 
         public void setFeld(Int32 i, Int32 j, Int32 val)
         {
             if (i < max_range && j < max_range && i>=0 && j>=0)
                 Map[i, j] = val;
+        }
+        public void setRealFeld(Int32 i, Int32 j, Int32 val)
+        {
+            if (i < max_range && j < max_range && i >= 0 && j >= 0)
+                Feld[i, j] = val;
         }
 
         public void resetFeld(Int32 i, Int32 j)
@@ -392,27 +391,24 @@ namespace ProjectX
             return valid;
         }
 
-        public void setgamestate(Int32 state)
-        { gamestate = state; }
-
-        public Int32 getgamestate()
-        { return gamestate; }
-
         public void hochlaufen()
         {
-            if (Agetpos_y() > 0 && Agetmovement() > 1)
+            if (Agetpos_y() > 0 && Agetmovement() > getZone(Agetpos_y()))
             {
                 if (Agettarget_y() == -1 && getRealFeld(Agetpos_x(), Agetpos_y() - 1) != 2)
                 {
                     Asettarget(Agetpos_x(), Agetpos_y() - 1);
-                    Asetmovement(Agetmovement() - 2);
+                    Asetmovement(Agetmovement() - (getZone(Agetpos_y())+1));
                 }
                 if (Agettarget_x() != -1 && Agettarget_y() != -1)
                 {
                     if (Agetpos_y() > Agettarget_y())
                     {
                         if ((Agetpos_y() * getflen() + Agetanimoffset_y() - getStep()) > (Agettarget_y() * getflen()))
+                        {
+                            if (!AgetOneStep()) AsetOneStep();
                             Asetanimoffset_y(Agetanimoffset_y() - getStep());
+                        }
                     }
                 }
             }  
@@ -432,7 +428,10 @@ namespace ProjectX
                     if (Agetpos_x() > Agettarget_x())
                     {
                         if ((Agetpos_x() * getflen() + Agetanimoffset_x() - getStep()) > (Agettarget_x() * getflen()))
+                        {
+                            if (!AgetOneStep()) AsetOneStep();
                             Asetanimoffset_x(Agetanimoffset_x() - getStep());
+                        }
                     }
                 }
             }  
@@ -452,28 +451,89 @@ namespace ProjectX
                     if (Agetpos_x() < Agettarget_x())
                     {
                         if ((Agetpos_x() * getflen() + Agetanimoffset_x() + getStep()) < (Agettarget_x() * getflen()))
+                        {
+                            if (!AgetOneStep()) AsetOneStep();
                             Asetanimoffset_x(Agetanimoffset_x() + getStep());
+                        }
                     }
                 }
             }    
         }
 
-        public void runterfallen()
-        {
-            if (Agetpos_y() < getRange() - 1 && Agetmovement() > 0)
-            {
-                Asetmovement(Agetmovement() - 1);
-
-                if (getRealFeld(Agetpos_x(), Agetpos_y() + 1) != 2)
+        public void runterfallen(Int32 p)
+        {      
+                if (getRealFeld(spieler[p].getpos_x(), spieler[p].getpos_y() + 1) != 2)
                 {
-                    while (getRealFeld(Agetpos_x(), Agetpos_y() + 1) != 2 && Agetpos_y() < getRange() - 1)
+                    while (getRealFeld(spieler[p].getpos_x(), spieler[p].getpos_y() + 1) != 2 && spieler[p].getpos_y() < getRange() - 1)
                     {
-                        Asetpos(Agetpos_x(), Agetpos_y() + 1);
-                        if ((Agetpos_y() * getflen() + Agetanimoffset_y() + getStep()) < (Agettarget_y() * getflen()))
-                            Asetanimoffset_y(Agetanimoffset_y() + getStep());
+                        spieler[p].setpos(spieler[p].getpos_x(), spieler[p].getpos_y() + 1);
+
+                        if ((spieler[p].getpos_y() * getflen() + spieler[p].getanimationoffset_y() + getStep()) < (spieler[p].gettarget_y() * getflen()))
+                        {
+                            if (p != active_player)
+                            {
+                                if (spieler[p].getmovement() > 0) spieler[p].setmovement(spieler[p].getmovement() - 1);
+                            }
+                            spieler[p].setanimationoffset_y(spieler[p].getanimationoffset_y() + getStep());
+                        }
                     }
+                }   
+        }
+
+        public void loadgame(Int32 l, Int32 r, Int32 p, Form1 f)
+        {
+            level = l;
+            max_range = r;
+            players = p;
+            init(f);
+        }
+
+        public Boolean AgetOneStep()
+        { return spieler[active_player].getOneStep(); }
+
+        public void AsetOneStep()
+        { spieler[active_player].setOneStep(); }
+
+        public Int32 getZone(Int32 z)
+        {
+            if (z > max_range-(max_range / 2)+2)
+                return 1;
+            else if (z <= max_range-((max_range / 2) - 2) && z> 3)
+                return 2;
+            else
+                return 3;
+        }
+
+        public Int32 getZonefield(Int32 z)
+        {
+            switch (z)
+            {
+                case 1:
+                    return max_range-(max_range / 2 - 2);
+                case 2://3
+                    return 3;
+            }
+            return 0;
+        }
+
+        public void toggleFeld(Int32 x, Int32 y)
+        {
+            Feld[x, y]++;
+            if (Feld[x, y] == 3) Feld[x, y] = 0;
+            if (Feld[x, y] == 1) Castle[x, y] = castle_max_life;
+            else Castle[x, y] = 0;
+        }
+
+        public void FeldtoMap()
+        {
+            for (Int32 i = 0; i < max_range; i++)
+                for (Int32 j = 0; j < max_range; j++)
+                {
+                    Map[i, j] = Feld[i, j];
+                    if (Map[i, j] == 1)
+                        Castle[i, j] = castle_max_life;
+                    else Castle[i, j] = 0;
                 }
-            }      
         }
 
     }

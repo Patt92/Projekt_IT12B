@@ -6,6 +6,7 @@ using System.Drawing;
 
 namespace ProjectX
 {
+    [Serializable]
     public class cplayer
     {
         private Int32 points;
@@ -23,6 +24,7 @@ namespace ProjectX
 
         private Int32 attack;
         private Int32 critical;
+        private Boolean one_step; //Wurde mindestens ein Schritt gemacht?
 
         private bool action_hide;
         
@@ -102,8 +104,16 @@ namespace ProjectX
         {   return target_position[1]; }
 
         public void settarget(Int32 _x, Int32 _y)
-        {   target_position[0] = _x;
-            target_position[1] = _y;   }
+        {
+            if (_x >= max_range)
+                target_position[0] = max_range - 1;
+            else
+                target_position[0] = _x;
+            if (_y >= max_range)
+                target_position[1] = max_range - 1;
+            else
+                target_position[1] = _y;   
+        }
 
         public void clean_target()
         {
@@ -144,7 +154,8 @@ namespace ProjectX
         {
             turn++;
             setmovement(movement+Convert.ToInt32(max_range - level/10));
-            if (movement <3 ) setmovement(3);
+            if (movement <4 ) setmovement(4);
+            one_step = false;
         }
         public Int32 getTurn()
         { return turn; }
@@ -166,6 +177,15 @@ namespace ProjectX
 
         public Boolean getActionHide()
         { return action_hide; }
+
+        public void setOneStep()
+        { one_step = true; }
+
+        public Boolean getOneStep()
+        { return one_step; }
+
+        public Int32 getPlayerNr()
+        { return player_nr; }
 
     }
 }

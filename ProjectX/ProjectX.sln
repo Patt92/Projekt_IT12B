@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectX", "ProjectX\ProjectX.csproj", "{EE73B9F1-65E7-4B8A-ADD9-596D717012AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cattura", "ProjectX\Cattura.csproj", "{EE73B9F1-65E7-4B8A-ADD9-596D717012AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
